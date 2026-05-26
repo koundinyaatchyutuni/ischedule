@@ -8,7 +8,7 @@ app.use(cors());
 app.use(express.json());
 
 mongoose.connect(
-        "mongodb+srv://koundinyaatchyutuni:Candy007@cluster0.a5qcwu9.mongodb.net/ischeduler?appName=Cluster0"
+        ""
     )
     .then(() => console.log("MongoDB Connected"))
     .catch(err => console.log(err));
