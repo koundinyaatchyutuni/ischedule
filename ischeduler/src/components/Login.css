@@ -1,0 +1,114 @@
+/* Reset */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+
+/* Full page */
+
+body {
+    background-color: #f0f4f9;
+}
+
+
+/* Container */
+
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+
+/* Form box */
+
+.login-container form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    width: 380px;
+    padding: 40px;
+    background-color: white;
+    border: 1px solid #dadce0;
+    border-radius: 28px;
+    box-shadow: 0 1px 3px rgba(60, 64, 67, 0.3);
+}
+
+
+/* Heading */
+
+.login-container form::before {
+    content: "Log in";
+    font-size: 32px;
+    font-weight: 400;
+    color: #202124;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+
+/* Inputs */
+
+.login-container input {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    border: 1px solid #dadce0;
+    border-radius: 6px;
+    outline: none;
+    transition: 0.2s;
+}
+
+.login-container input:focus {
+    border: 2px solid #1a73e8;
+}
+
+
+/* Login button */
+
+.login-container button[type="submit"] {
+    background-color: #1a73e8;
+    color: white;
+    border: none;
+    padding: 12px;
+    font-size: 15px;
+    font-weight: 500;
+    border-radius: 24px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.login-container button[type="submit"]:hover {
+    background-color: #1558b0;
+}
+
+
+/* Signup button */
+
+.login-container button[type="button"] {
+    background-color: white;
+    color: #1a73e8;
+    border: 1px solid #dadce0;
+    padding: 12px;
+    font-size: 15px;
+    font-weight: 500;
+    border-radius: 24px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.login-container button[type="button"]:hover {
+    background-color: #f6fafe;
+}
+
+
+/* Link */
+
+.login-container a {
+    text-decoration: none;
+}
