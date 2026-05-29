@@ -37,9 +37,14 @@ function Home() {
   };
 
   return (
+    <>
+    <div className='app-header'>
+      <h1>iScheduler</h1>
+      <img src="../assets/" alt="" />
+    </div>
+
     <div className="app-container">
 
-      <h1>iScheduler</h1>
 
       <button onClick={onclick}>Add Task</button>
 
@@ -89,6 +94,7 @@ function Home() {
       </div>
 
     </div>
+    </>
   );
 }
 

@@ -103,7 +103,7 @@ const Signup = () => {
           }
         />
 
-        <p className='error-message'>
+        <p className='error-message' style={{ color: helperText === 'red' ? 'red' : 'green' }}>
           {usernameError}
         </p>
 
@@ -132,7 +132,7 @@ const Signup = () => {
           }}
         />
 
-        <p className='error-message'>
+        <p className='error-message' style={{ color: helperText === 'red' ? 'red' : 'green' }}>
           {passwordError}
         </p>
 
