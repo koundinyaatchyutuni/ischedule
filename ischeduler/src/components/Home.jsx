@@ -40,7 +40,8 @@ function Home() {
     <>
     <div className='app-header'>
       <h1>iScheduler</h1>
-      <img src="../assets/" alt="" />
+      <img src="..\assets\default log in img.jpg" alt="" />
+      <p className='user_name'>John Doe</p>
     </div>
 
     <div className="app-container">

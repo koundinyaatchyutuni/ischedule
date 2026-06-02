@@ -2,10 +2,11 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from 'dotenv';
+import jsonwebtoken from "jsonwebtoken";
 
 dotenv.config();
 const app = express();
-
+const jws = jsonwebtoken();
 app.use(cors());
 app.use(express.json());
 
@@ -82,6 +83,7 @@ app.post("/login", async(req, res) => {
 
         if (user) {
             res.json({
+
                 status: "success"
             });
         } else {
