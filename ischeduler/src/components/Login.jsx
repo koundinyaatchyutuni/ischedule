@@ -24,7 +24,14 @@ function Login() {
         }
       );
 
-      if(result.data.status === "success"){
+      if(result.status === 200){
+        localStorage.setItem("token", result.data.token);
+
+        // store user info
+        localStorage.setItem(
+            "user",
+            JSON.stringify(result.data.user)
+        );
 
         navigate("/");
       }

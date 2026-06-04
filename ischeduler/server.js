@@ -2,11 +2,12 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from 'dotenv';
-import jsonwebtoken from "jsonwebtoken";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
 
 dotenv.config();
 const app = express();
-const jws = jsonwebtoken();
+// const jws = require('jsonwebtoken');
 app.use(cors());
 app.use(express.json());
 
@@ -48,7 +49,7 @@ app.post("/signup", async(req, res) => {
 
         const user = await User.create({
             user_name: username,
-            password
+            password: await bcrypt.hash(password, 10)
         });
 
         if (user) {
@@ -60,7 +61,7 @@ app.post("/signup", async(req, res) => {
                 status: "failed"
             });
         }
-
+        // navigate('/login');
     } catch (err) {
 
         console.log(err);
@@ -71,36 +72,56 @@ app.post("/signup", async(req, res) => {
     }
 });
 app.post("/login", async(req, res) => {
-
     const { username, password } = req.body;
 
     try {
-
         const user = await User.findOne({
-            user_name: username,
-            password
+            user_name: username
         });
 
-        if (user) {
-            res.json({
-
-                status: "success"
-            });
-        } else {
-            res.json({
-                status: "failed"
+        if (!user) {
+            return res.status(400).json({
+                message: "User not found"
             });
         }
 
+        const isMatch = await bcrypt.compare(
+            password,
+            user.password
+        );
+
+        if (!isMatch) {
+            return res.status(400).json({
+                message: "Invalid credentials"
+            });
+        }
+
+        const token = jwt.sign({
+                id: user._id,
+                username: user.user_name
+            },
+            "secretkey", {
+                expiresIn: "1h"
+            }
+        );
+
+        return res.status(200).json({
+            token,
+            user: {
+                id: user._id,
+                username: user.user_name
+            }
+        });
+
     } catch (err) {
+        console.error(err);
 
-        console.log(err);
-
-        res.json({
-            status: "error"
+        return res.status(500).json({
+            message: "Internal Server Error"
         });
     }
 });
+
 
 app.listen(process.env.port, () => {
     console.log("Server running on http://localhost:" + process.env.port);

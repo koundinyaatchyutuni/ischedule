@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Task from "./Task";
 import "../App.css";
 
@@ -9,7 +9,10 @@ function Home() {
   const [name, setName] = useState('');
   const [importance, setImportance] = useState('low');
   const [deadline, setDeadline] = useState('');
-
+  const [user, setUser] = useState(null);
+    useEffect(() => {
+        setUser(JSON.parse(localStorage.getItem("user")));
+    }, []);
   const onclick = () => {
     setFlag(true);
   };
@@ -40,8 +43,8 @@ function Home() {
     <>
     <div className='app-header'>
       <h1>iScheduler</h1>
-      <img src="..\assets\default log in img.jpg" alt="" />
-      <p className='user_name'>John Doe</p>
+      <img src="ischeduler\src\assets\default log in img.jpg" alt="" style={{ width: '6px', height: '6px' }} />
+      <p className='user_name'>{user ? user.username : 'Guest'}</p>
     </div>
 
     <div className="app-container">
