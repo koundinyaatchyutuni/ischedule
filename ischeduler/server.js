@@ -71,6 +71,12 @@ app.post("/signup", async(req, res) => {
         });
     }
 });
+// to store task details of users in db
+app.post("/", async(req, res) => {
+
+    const {}
+
+});
 app.post("/login", async(req, res) => {
     const { username, password } = req.body;
 

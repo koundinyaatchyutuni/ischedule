@@ -7,6 +7,19 @@
     font-family: "Segoe UI", sans-serif;
 }
 
+.app-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+img {
+    margin-left: auto;
+    margin-right: 15px;
+    border-radius: 50%;
+}
+
 
 /* App container */
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Task from "./Task";
 import "../App.css";
+import profilePic from '../assets/default log in img.jpg';
 
 function Home() {
 
@@ -43,12 +44,18 @@ function Home() {
     <>
     <div className='app-header'>
       <h1>iScheduler</h1>
-      <img src="ischeduler\src\assets\default log in img.jpg" alt="" style={{ width: '6px', height: '6px' }} />
-      <p className='user_name'>{user ? user.username : 'Guest'}</p>
-    </div>
+      <img src={profilePic} alt="Profile" style={{
+    width: "80px",
+    height: "80px",
+    borderRadius: "50%",
+    objectFit: "cover",
+    border: "3px solid #fff",
+  }} />
+<p className='user_name' style={{ marginRight: '15px' }}>
+  {user ? user.username : 'Guest'}
+</p>    </div>
 
     <div className="app-container">
-
 
       <button onClick={onclick}>Add Task</button>
 
