@@ -19,7 +19,11 @@ const UserSchema = new mongoose.Schema({
     user_name: String,
     password: String
 });
-
+const TaskSchema = new mongoose.Schema({
+    user_name: String,
+    task_list: Array
+});
+const Task = mongoose.model('tasks', TaskSchema);
 const User = mongoose.model("user", UserSchema);
 app.post('/finduser', async(req, res) => {
     const { username } = req.body;
@@ -72,9 +76,24 @@ app.post("/signup", async(req, res) => {
     }
 });
 // to store task details of users in db
-app.post("/", async(req, res) => {
+app.post("/savetasks", async(req, res) => {
 
-    const {}
+    const { username, tasks } = req.body;
+    try {
+        const result = await Task.updateOne({ user_name: username }, { $set: { task_list: tasks } }, { upsert: true });
+        console.log("Received tasks:", tasks);
+        console.log(result);
+        if (result.acknowledged) {
+            res.status(200).json({ message: "Success" });
+        } else {
+            res.status(400).json({ message: "Failed" });
+        }
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            message: "Internal Server Error"
+        });
+    }
 
 });
 app.post("/login", async(req, res) => {

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import Task from "./Task";
 import "../App.css";
 import profilePic from '../assets/default log in img.jpg';
+import axios from "axios";
 
 function Home() {
 
@@ -40,6 +41,16 @@ function Home() {
     setDeadline("");
   };
 
+  const handleSave = async (e)=>{
+    e.preventDefault();
+    const username = user.username;
+    const responce = await axios.post('http://localhost:3001/savetasks',{ username, tasks });
+    if (responce.status === 200) {
+      alert("Tasks saved successfully");
+    } else {
+      alert("Failed to save tasks");
+    }
+  };
   return (
     <>
     <div className='app-header'>
@@ -58,7 +69,7 @@ function Home() {
     <div className="app-container">
 
       <button onClick={onclick}>Add Task</button>
-
+      <button onClick={handleSave}>Submit</button>
       {flag && (
         <form onSubmit={handleSubmit}>
 
