@@ -25,6 +25,24 @@ const TaskSchema = new mongoose.Schema({
 });
 const Task = mongoose.model('tasks', TaskSchema);
 const User = mongoose.model("user", UserSchema);
+
+//need to add this taks recieving in home.jsx
+app.get('/gettasks', async(req, res) => {
+    const {
+        username
+    } = req.body;
+    try {
+        const usr = await Tasks.findOne({ username: username });
+        if (usr) {
+            res.status(200).json({ tasks: usr.tasks })
+        } else {
+            res.status(420).json({ taks: [] })
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "error while fetching taks for username " + username })
+    }
+});
 app.post('/finduser', async(req, res) => {
     const { username } = req.body;
     try {
