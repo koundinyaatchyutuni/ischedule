@@ -41,8 +41,16 @@ function Home() {
     setDeadline("");
   };
 
+  const updateTask = (id, updatedTask) => {
+  setTasks(
+    tasks.map((task) =>
+      task.id === id ? { ...task, ...updatedTask } : task
+    )
+  );
+};
   const handleSave = async (e)=>{
     e.preventDefault();
+    // setTasks([...tasks]);
     const username = user.username;
     const responce = await axios.post('http://localhost:3001/savetasks',{ username, tasks });
     if (responce.status === 200) {
@@ -107,11 +115,13 @@ function Home() {
       <div className="tasks-list">
         {tasks.map((task) => (
           <Task
-            key={task.id}
-            task={task.name}
-            importance={task.importance}
-            deadline={task.deadline}
-          />
+          key={task.id}
+          id={task.id}
+          task={task.name}
+          importance={task.importance}
+          deadline={task.deadline}
+          updateTask={updateTask}
+        />
         ))}
       </div>
 

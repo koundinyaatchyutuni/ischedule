@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import './Task.css';
-
-function Task({ task, importance, deadline }) {
+function Task({id,task,importance, deadline,updateTask})  {
 
   const [show, setShow] = useState(false);
   const [edit, setEdit] = useState(false);
@@ -10,9 +9,19 @@ function Task({ task, importance, deadline }) {
   const [taskName, setTaskName] = useState(task);
   const [taskImportance, setTaskImportance] = useState(importance);
 
+
   const handleEdit = () => {
     setEdit(true);
   };
+
+  const handleSave = () => {
+  updateTask(id, {
+    name: taskName,
+    importance: taskImportance,
+  });
+
+  setEdit(false);
+};
 
   return (
     <>
@@ -70,9 +79,7 @@ function Task({ task, importance, deadline }) {
             <option value="low">Low</option>
           </select>
 
-          <button onClick={() => setEdit(false)}>
-            Save
-          </button>
+          <button onClick={handleSave}> Save </button>
 
         </div>
       )}
