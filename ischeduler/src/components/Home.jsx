@@ -12,9 +12,33 @@ function Home() {
   const [importance, setImportance] = useState('low');
   const [deadline, setDeadline] = useState('');
   const [user, setUser] = useState(null);
+
     useEffect(() => {
-        setUser(JSON.parse(localStorage.getItem("user")));
-    }, []);
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+
+    setUser(storedUser);
+    console.log("Stored user:", storedUser);
+    if (storedUser) {
+        const fetchTasks = async () => {
+            console.log("fetchTasks called");
+
+            try {
+                const response = await axios.post(
+                    "http://localhost:3001/gettasks",
+                    {
+                        username: storedUser.username,
+                    }
+                );
+
+                setTasks(response.data.tasks);
+            } catch (error) {
+                console.error(error);
+            }
+        };
+
+        fetchTasks();
+    }
+}, []);
   const onclick = () => {
     setFlag(true);
   };
