@@ -72,6 +72,9 @@ function Home() {
     )
   );
 };
+const deleteTask = (id) => {
+  setTasks(tasks.filter((task) => task.id !== id));
+}
   const handleSave = async (e)=>{
     e.preventDefault();
     // setTasks([...tasks]);
@@ -137,7 +140,7 @@ function Home() {
       )}
 
       <div className="tasks-list">
-        {tasks.map((task) => (
+        {tasks.map((task) => ( 
           <Task
           key={task.id}
           id={task.id}
@@ -145,6 +148,7 @@ function Home() {
           importance={task.importance}
           deadline={task.deadline}
           updateTask={updateTask}
+          deleteTask={deleteTask}
         />
         ))}
       </div>

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import './Task.css';
-function Task({id,task,importance, deadline,updateTask})  {
+import editIcon from '../assets/edit-icon2.png';
+import deleteIcon from '../assets/delete-icon.png';
+function Task({id,task,importance, deadline,updateTask,deleteTask})  {
 
   const [show, setShow] = useState(false);
   const [edit, setEdit] = useState(false);
@@ -46,18 +48,14 @@ function Task({id,task,importance, deadline,updateTask})  {
             <p className={`task-importance ${taskImportance}`}>
               {taskImportance}
             </p>
-
           </div>
+            {show && (
+              <img src={editIcon} alt="Edit" className='edit-icon' onClick={handleEdit} style={{ cursor: 'pointer', width: '36px', height: 'auto', marginLeft: '1.5px' , marginRight: '0px'}}/>
+            )}
         </div>
-
         {show && (
-          <button
-            className='task-edit'
-            onClick={handleEdit}
-          >
-            Edit
-          </button>
-        )}
+              <img src={deleteIcon} alt="Delete" className='delete-icon' onClick={() => deleteTask(id)} style={{ cursor: 'pointer', width: 'auto', height: '36px',marginTop:'10px' }} />
+            )}
       </div>
 
       {edit && (
