@@ -4,6 +4,18 @@ import cors from "cors";
 import dotenv from 'dotenv';
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import nodemailer from "nodemailer";
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.EMAIL,
+        pass: process.env.EMAIL_PASSWORD
+    }
+});
+
+function generateOTP() {
+    return Math.floor(100000 + Math.random() * 900000);
+}
 
 dotenv.config();
 const app = express();
@@ -79,15 +91,41 @@ app.post('/finduser', async(req, res) => {
     }
 });
 
+app.post('/checkmail', async(req, res) => {
+    const { email } = req.body;
+    try {
+        otp = generateOTP();
+        const mailOptions = {
+            from: process.env.EMAIL,
+            to: email,
+            subject: "VERIFICATION code for iScheduler account",
+            text: `Your OTP is ${otp}. It will expire in 5 minutes.`
+        };
+
+        await transporter.sendMail(mailOptions);
+        res.json({
+            status: "success",
+            otp
+        });
+
+    } catch (err) {
+        res.json({
+            status: "error"
+        });
+    }
+});
+
+
 app.post("/signup", async(req, res) => {
 
-    const { username, password } = req.body;
+    const { username, password, email } = req.body;
 
     try {
 
         const user = await User.create({
             user_name: username,
-            password: await bcrypt.hash(password, 10)
+            password: await bcrypt.hash(password, 10),
+            email: await bcrypt.hash(email, 10)
         });
 
         if (user) {

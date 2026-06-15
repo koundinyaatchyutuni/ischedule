@@ -13,6 +13,8 @@ const Signup = () => {
   const [usernameError, setUsernameError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [helperText, setHelperText] = useState('');
+const[usermail,setUsermail]=useState('');
+
   const finduser = async (username) => {
     try {
       const result = await axios.post(
@@ -69,7 +71,8 @@ const Signup = () => {
         'http://localhost:3001/signup',
         {
           username,
-          password
+          password,
+          email:usermail
         }
       );
 
@@ -102,6 +105,7 @@ const Signup = () => {
             borderColor: helperText}
           }
         />
+        <input type="email" placeholder="Email"   required />
 
         <p className='error-message' style={{ color: helperText === 'red' ? 'red' : 'green' }}>
           {usernameError}
