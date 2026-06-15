@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import './Task.css';
 import editIcon from '../assets/edit-icon2.png';
-import deleteIcon from '../assets/delete-icon.png';
+import deleteIcon1 from '../assets/delete-icon1.png';
+import deleteIcon2 from '../assets/delete-icon2.png';
 function Task({id,task,importance, deadline,updateTask,deleteTask})  {
 
   const [show, setShow] = useState(false);
@@ -50,11 +51,11 @@ function Task({id,task,importance, deadline,updateTask,deleteTask})  {
             </p>
           </div>
             {show && (
-              <img src={editIcon} alt="Edit" className='edit-icon' onClick={handleEdit} style={{ cursor: 'pointer', width: '36px', height: 'auto', marginLeft: '1.5px' , marginRight: '0px'}}/>
+              <img src={editIcon} alt="Edit" className='edit-icon' onMouseEnter={(e)=> e.target.style.filter = "brightness(1.2)"} onMouseLeave={(e)=> e.target.style.filter = "brightness(1)"} onClick={handleEdit} style={{ cursor: 'pointer', width: '36px', height: 'auto', marginLeft: '1.5px' , marginRight: '0px'}}/>
             )}
         </div>
         {show && (
-              <img src={deleteIcon} alt="Delete" className='delete-icon' onClick={() => deleteTask(id)} style={{ cursor: 'pointer', width: 'auto', height: '36px',marginTop:'10px' }} />
+              <img src={deleteIcon1} alt="Delete" className='delete-icon1' onMouseEnter={(e) => (e.target.src = deleteIcon2)} onMouseLeave={(e) => (e.target.src = deleteIcon1)} onClick={() => deleteTask(id)} style={{ cursor: 'pointer', width: 'auto', height: '36px',marginTop:'10px' }} />
             )}
       </div>
 
