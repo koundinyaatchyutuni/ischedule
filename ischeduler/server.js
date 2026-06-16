@@ -5,6 +5,8 @@ import dotenv from 'dotenv';
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import nodemailer from "nodemailer";
+
+dotenv.config();
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -17,7 +19,6 @@ function generateOTP() {
     return Math.floor(100000 + Math.random() * 900000);
 }
 
-dotenv.config();
 const app = express();
 // const jws = require('jsonwebtoken');
 app.use(cors());
@@ -29,7 +30,8 @@ mongoose.connect(process.env.mongo_uri)
 
 const UserSchema = new mongoose.Schema({
     user_name: String,
-    password: String
+    password: String,
+    email: String
 });
 const TaskSchema = new mongoose.Schema({
     user_name: String,
@@ -91,10 +93,11 @@ app.post('/finduser', async(req, res) => {
     }
 });
 
-app.post('/checkmail', async(req, res) => {
+app.post('/sendotp', async(req, res) => {
     const { email } = req.body;
     try {
-        otp = generateOTP();
+        const otp = generateOTP();
+
         const mailOptions = {
             from: process.env.EMAIL,
             to: email,
@@ -103,18 +106,18 @@ app.post('/checkmail', async(req, res) => {
         };
 
         await transporter.sendMail(mailOptions);
-        res.json({
+
+        res.status(200).json({
             status: "success",
             otp
         });
 
     } catch (err) {
-        res.json({
+        res.status(500).json({
             status: "error"
         });
     }
 });
-
 
 app.post("/signup", async(req, res) => {
 

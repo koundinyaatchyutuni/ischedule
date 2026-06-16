@@ -13,7 +13,13 @@ const Signup = () => {
   const [usernameError, setUsernameError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [helperText, setHelperText] = useState('');
-const[usermail,setUsermail]=useState('');
+  const[usermail,setUsermail]=useState('');
+  const [showVerifyButton,setShowVerifyButton]=useState(false);
+  const [showOtpInput,setShowOtpInput]=useState(false);
+  const [otp,setOtp]=useState('');
+  const [sentOtp,setSentOtp]=useState('');
+  const [allowSignup,setallowSignup]=useState(false);
+
 
   const finduser = async (username) => {
     try {
@@ -50,6 +56,33 @@ const[usermail,setUsermail]=useState('');
       setHelperText("blue");
     }
   };
+
+  const handleVerifyEmail = async () => {
+    try{
+      const result = await axios.post(
+        'http://localhost:3001/sendotp',
+        { email: usermail }
+      );
+      if (result.status===200){
+        // alert("OTP sent to email");
+        setShowOtpInput(true);
+        setSentOtp(result.data.otp);
+      }else{
+        alert("Failed to send OTP");
+      }
+    }
+    catch(error){
+      console.error("Error verifying email:", error);
+    }
+  };
+
+const handleVerifyOtp=()=>{
+  if (String(otp) === String(sentOtp)) {
+  setallowSignup(true);
+  setShowOtpInput(false);
+  setShowVerifyButton(false);
+}
+}
 
   const handlesubmit = async (e) => {
 
@@ -105,8 +138,16 @@ const[usermail,setUsermail]=useState('');
             borderColor: helperText}
           }
         />
-        <input type="email" placeholder="Email"   required />
-
+        <div>
+        <input type="email" placeholder="Email" onChange={(e) => {setUsermail(e.target.value); setShowVerifyButton(true)}} required />
+        {showVerifyButton && <button type="button" onClick={handleVerifyEmail}>verify</button>}
+        {showOtpInput && (
+          <div>
+            <input type="text" placeholder="Enter OTP" onChange={(e) => setOtp(e.target.value)} required />
+            <button type="button" onClick={handleVerifyOtp}>Submit OTP</button>
+          </div>
+        )}
+        </div>
         <p className='error-message' style={{ color: helperText === 'red' ? 'red' : 'green' }}>
           {usernameError}
         </p>
@@ -144,7 +185,13 @@ const[usermail,setUsermail]=useState('');
           Already have an account? Log in
         </Link>
 
-        <button type="submit">
+        <button type="submit" disabled={!allowSignup} onMouseOver={(e) => {
+          if (!allowSignup) {
+            e.target.style.cursor = "not-allowed";
+          } else {
+            e.target.style.cursor = "pointer";        
+          }
+        }}>
           Sign Up
         </button>
 
