@@ -3,6 +3,7 @@ import Task from "./Task";
 import "../App.css";
 import profilePic from '../assets/default log in img.jpg';
 import axios from "axios";
+import Repeat from "./Repeat";
 
 function Home() {
 
@@ -10,9 +11,17 @@ function Home() {
   const [flag, setFlag] = useState(false);
   const [name, setName] = useState('');
   const [importance, setImportance] = useState('low');
-  const [deadline, setDeadline] = useState('');
+  const [scheduleTime, setScheduleTime] = useState('');
   const [user, setUser] = useState(null);
-
+  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const [selectedDays, setSelectedDays] = useState([]);
+  const toggleDay = (day) => {
+    setSelectedDays((prev) =>
+      prev.includes(day)
+        ? prev.filter((d) => d !== day)
+        : [...prev, day]
+    );
+  };
     useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
 
@@ -54,7 +63,8 @@ function Home() {
       id: Date.now(),
       name,
       importance,
-      deadline,
+      scheduleTime,
+      selectedDays
     };
 
     setTasks([...tasks, newTask]);
@@ -62,7 +72,7 @@ function Home() {
     setFlag(false);
     setName("");
     setImportance("low");
-    setDeadline("");
+    setScheduleTime("");
   };
 
   const updateTask = (id, updatedTask) => {
@@ -124,14 +134,17 @@ const deleteTask = (id) => {
             <option value="high">High</option>
           </select>
 
+        <Repeat
+        days={days}
+        selectedDays={selectedDays}
+        toggleDay={toggleDay}
+      />
           <input
-            type="date"
-            value={deadline}
-            onChange={(e) => setDeadline(e.target.value)}
+            type="time"
+            value={scheduleTime}
+            onChange={(e) => setScheduleTime(e.target.value)}
           />
-
           <button type="submit">Submit</button>
-
           <button type="button" onClick={goBack}>
             Go Back
           </button>
@@ -146,7 +159,8 @@ const deleteTask = (id) => {
           id={task.id}
           task={task.name}
           importance={task.importance}
-          deadline={task.deadline}
+          scheduleTime={task.scheduleTime}
+          selectedDays={task.selectedDays}
           updateTask={updateTask}
           deleteTask={deleteTask}
         />

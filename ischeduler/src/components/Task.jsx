@@ -3,7 +3,7 @@ import './Task.css';
 import editIcon from '../assets/edit-icon2.png';
 import deleteIcon1 from '../assets/delete-icon1.png';
 import deleteIcon2 from '../assets/delete-icon2.png';
-function Task({id,task,importance, deadline,updateTask,deleteTask})  {
+function Task({id,task,importance,scheduleTime,selectedDays,updateTask,deleteTask})  {
 
   const [show, setShow] = useState(false);
   const [edit, setEdit] = useState(false);
@@ -43,10 +43,12 @@ function Task({id,task,importance, deadline,updateTask,deleteTask})  {
           <div className='task-info'>
 
             <p className='task-deadline'>
-              {deadline}
+              {scheduleTime}
             </p>
-
-            <p className={`task-importance ${taskImportance}`}>
+            <p className='task-days'>
+              {selectedDays.join(', ')}
+            </p>
+            <p className='task-importance'>
               {taskImportance}
             </p>
           </div>
