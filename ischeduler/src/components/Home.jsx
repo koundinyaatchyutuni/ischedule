@@ -4,6 +4,9 @@ import "../App.css";
 import profilePic from '../assets/default log in img.jpg';
 import axios from "axios";
 import Repeat from "./Repeat";
+import Clock from "./Clock";
+import dayjs from "dayjs";
+
 
 function Home() {
 
@@ -11,7 +14,7 @@ function Home() {
   const [flag, setFlag] = useState(false);
   const [name, setName] = useState('');
   const [importance, setImportance] = useState('low');
-  const [scheduleTime, setScheduleTime] = useState('');
+  const [scheduleTime, setScheduleTime] = useState(dayjs());
   const [user, setUser] = useState(null);
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const [selectedDays, setSelectedDays] = useState([]);
@@ -133,17 +136,14 @@ const deleteTask = (id) => {
             <option value="medium">Medium</option>
             <option value="high">High</option>
           </select>
+          <Clock scheduleTime={scheduleTime} setScheduleTime={setScheduleTime} />
 
         <Repeat
         days={days}
         selectedDays={selectedDays}
         toggleDay={toggleDay}
       />
-          <input
-            type="time"
-            value={scheduleTime}
-            onChange={(e) => setScheduleTime(e.target.value)}
-          />
+         
           <button type="submit">Submit</button>
           <button type="button" onClick={goBack}>
             Go Back
@@ -159,7 +159,7 @@ const deleteTask = (id) => {
           id={task.id}
           task={task.name}
           importance={task.importance}
-          scheduleTime={task.scheduleTime}
+          scheduleTime={task.scheduleTime.format("hh:mm A")}
           selectedDays={task.selectedDays}
           updateTask={updateTask}
           deleteTask={deleteTask}
