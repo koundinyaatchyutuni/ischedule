@@ -14,10 +14,43 @@ function Home() {
   const [flag, setFlag] = useState(false);
   const [name, setName] = useState('');
   const [importance, setImportance] = useState('low');
-  const [scheduleTime, setScheduleTime] = useState(dayjs());
+  const [startTime, setStartTime] = useState(dayjs());
+  const [endTime, setEndTime] = useState(dayjs());
   const [user, setUser] = useState(null);
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const [selectedDays, setSelectedDays] = useState([]);
+  const [schedule,setSchedule]= useState(Object.fromEntries(days.map(day => [day, []])));
+
+  // binary search sorted search times 
+  const search=(day, startTime, endTime)=>{
+    const scheduledTasks = schedule[day];
+    let l=0,h=scheduledTasks.length-1;
+    while(l<=h){
+      const mid=Math.floor((h-l)/2)+l;
+    if (scheduledTasks[mid].endTime.isSame(startTime) || scheduledTasks[mid].endTime.isBefore(startTime)) {
+      l = mid + 1;
+    }
+    else if (
+      scheduledTasks[mid].startTime.isSame(endTime) ||  scheduledTasks[mid].startTime.isAfter(endTime)
+    ) {
+      h = mid - 1;
+    }
+    else {
+      return true;
+    }
+    }
+    return false;
+  };
+  // verify collision for all selected days
+  const verifyCollision=(scheduledays)=>{
+    for (const day of scheduledays) {
+      const scheduledTasks = schedule[day];
+      if (!search(day, startTime, endTime)) {
+        return false;
+      }
+    }
+    return true;
+  }
   const toggleDay = (day) => {
     setSelectedDays((prev) =>
       prev.includes(day)
@@ -27,7 +60,7 @@ function Home() {
   };
     useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
-
+    
     setUser(storedUser);
     console.log("Stored user:", storedUser);
     if (storedUser) {
@@ -58,15 +91,28 @@ function Home() {
   const goBack = () => {
     setFlag(false);
   };
-
+  const verifyTime = () => {
+    return startTime.isBefore(endTime);
+  };
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    if (!verifyTime()) {
+      alert("End time must be after start time");
+      return;
+    }
+
+    if (verifyCollision(selectedDays)) {
+      alert("Task time collides with existing tasks");
+      return;
+    }
 
     const newTask = {
       id: Date.now(),
       name,
       importance,
-      scheduleTime,
+      startTime,
+      endTime,
       selectedDays
     };
 
@@ -75,7 +121,8 @@ function Home() {
     setFlag(false);
     setName("");
     setImportance("low");
-    setScheduleTime("");
+    setStartTime(dayjs());
+    setEndTime(dayjs());
   };
 
   const updateTask = (id, updatedTask) => {
@@ -136,8 +183,10 @@ const deleteTask = (id) => {
             <option value="medium">Medium</option>
             <option value="high">High</option>
           </select>
-          <Clock scheduleTime={scheduleTime} setScheduleTime={setScheduleTime} />
-
+          <p> start time: </p>
+          <Clock scheduleTime={startTime} setScheduleTime={setStartTime} />
+          <p> End time: </p>
+          <Clock scheduleTime={endTime} setScheduleTime={setEndTime} />
         <Repeat
         days={days}
         selectedDays={selectedDays}
@@ -159,7 +208,8 @@ const deleteTask = (id) => {
           id={task.id}
           task={task.name}
           importance={task.importance}
-          scheduleTime={task.scheduleTime.format("hh:mm A")}
+          startTime={task.startTime.format("hh:mm A")}
+          endTime={task.endTime.format("hh:mm A")}
           selectedDays={task.selectedDays}
           updateTask={updateTask}
           deleteTask={deleteTask}
