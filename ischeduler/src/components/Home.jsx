@@ -6,7 +6,7 @@ import axios from "axios";
 import Repeat from "./Repeat";
 import Clock from "./Clock";
 import dayjs from "dayjs";
-
+import ScheduleView from "./ScheduleView";
 
 function Home() {
 
@@ -94,6 +94,15 @@ function Home() {
   const verifyTime = () => {
     return startTime.isBefore(endTime);
   };
+  const addToSchedule = (newTask) => {
+    for (const day of newTask.selectedDays) {
+      const scheduledTasks = schedule[day];
+      const index = scheduledTasks.findIndex(
+        (task) => task.startTime.isAfter(newTask.startTime)
+      );
+      scheduledTasks.splice(index, 0, {startTime: newTask.startTime, endTime: newTask.endTime});
+    }
+  };
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -115,9 +124,8 @@ function Home() {
       endTime,
       selectedDays
     };
-
+    addToSchedule(newTask);
     setTasks([...tasks, newTask]);
-
     setFlag(false);
     setName("");
     setImportance("low");
@@ -216,7 +224,7 @@ const deleteTask = (id) => {
         />
         ))}
       </div>
-
+      <ScheduleView tasks={tasks} />
     </div>
     </>
   );
