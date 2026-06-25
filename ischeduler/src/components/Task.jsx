@@ -3,6 +3,8 @@ import './Task.css';
 import editIcon from '../assets/edit-icon2.png';
 import deleteIcon1 from '../assets/delete-icon1.png';
 import deleteIcon2 from '../assets/delete-icon2.png';
+import Clock from './Clock';
+
 function Task({id,task,importance,scheduleTime,selectedDays,updateTask,deleteTask})  {
 
   const [show, setShow] = useState(false);
@@ -11,7 +13,7 @@ function Task({id,task,importance,scheduleTime,selectedDays,updateTask,deleteTas
   // Editable states
   const [taskName, setTaskName] = useState(task);
   const [taskImportance, setTaskImportance] = useState(importance);
-
+  const [taskscheduleTime, setTaskscheduleTime] = useState(scheduleTime);
 
   const handleEdit = () => {
     setEdit(true);
@@ -21,6 +23,7 @@ function Task({id,task,importance,scheduleTime,selectedDays,updateTask,deleteTas
   updateTask(id, {
     name: taskName,
     importance: taskImportance,
+    scheduleTime: taskscheduleTime
   });
 
   setEdit(false);
@@ -43,7 +46,7 @@ function Task({id,task,importance,scheduleTime,selectedDays,updateTask,deleteTas
           <div className='task-info'>
 
             <p className='task-deadline'>
-              {scheduleTime}
+              {taskscheduleTime}
             </p>
             <p className='task-days'>
               {selectedDays.join(', ')}
@@ -79,9 +82,8 @@ function Task({id,task,importance,scheduleTime,selectedDays,updateTask,deleteTas
             <option value="medium">Medium</option>
             <option value="low">Low</option>
           </select>
-
+          <Clock scheduleTime={taskscheduleTime} setScheduleTime={setTaskscheduleTime} />
           <button onClick={handleSave}> Save </button>
-
         </div>
       )}
     </>

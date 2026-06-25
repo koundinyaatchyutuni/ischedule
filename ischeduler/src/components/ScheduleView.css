@@ -1,0 +1,72 @@
+.schedule-wrapper {
+    margin-top: 30px;
+    padding: 20px;
+    background: white;
+    border-radius: 12px;
+}
+
+.day-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.day-buttons button {
+    padding: 8px 16px;
+    border: none;
+    cursor: pointer;
+}
+
+.day-buttons .active {
+    background: #1976d2;
+    color: white;
+}
+
+.schedule {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.time-header {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    border-bottom: 1px solid #ddd;
+    background: #f5f5f5;
+}
+
+.time-label {
+    text-align: center;
+    padding: 10px;
+    font-weight: bold;
+}
+
+.task-area {
+    position: relative;
+    min-height: 300px;
+    padding-top: 20px;
+}
+
+.task-bar {
+    position: relative;
+    height: 40px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    color: white;
+    display: flex;
+    align-items: center;
+    padding-left: 10px;
+    font-weight: 600;
+}
+
+.task-bar.low {
+    background: #4caf50;
+}
+
+.task-bar.medium {
+    background: #ff9800;
+}
+
+.task-bar.high {
+    background: #f44336;
+}
