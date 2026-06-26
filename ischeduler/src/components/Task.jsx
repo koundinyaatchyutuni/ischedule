@@ -4,16 +4,26 @@ import editIcon from '../assets/edit-icon2.png';
 import deleteIcon1 from '../assets/delete-icon1.png';
 import deleteIcon2 from '../assets/delete-icon2.png';
 import Clock from './Clock';
+import Repeat from './Repeat';
 
-function Task({id,task,importance,scheduleTime,selectedDays,updateTask,deleteTask})  {
+function Task({id,task,startTime,endTime,selectedDays,updateTask,deleteTask})  {
 
   const [show, setShow] = useState(false);
   const [edit, setEdit] = useState(false);
-
+  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   // Editable states
   const [taskName, setTaskName] = useState(task);
-  const [taskImportance, setTaskImportance] = useState(importance);
-  const [taskscheduleTime, setTaskscheduleTime] = useState(scheduleTime);
+  const [taskstartTime, setTaskscheduleTime] = useState(startTime);
+  const [taskendTime, setTaskendTime] = useState(endTime);
+  const [taskselectedDays, settaskSelectedDays] = useState(selectedDays);
+  
+  const toggleDay = (day) => {
+    settaskSelectedDays((prev) =>
+      prev.includes(day)
+        ? prev.filter((d) => d !== day)
+        : [...prev, day]
+    );
+  };
 
   const handleEdit = () => {
     setEdit(true);
@@ -22,9 +32,11 @@ function Task({id,task,importance,scheduleTime,selectedDays,updateTask,deleteTas
   const handleSave = () => {
   updateTask(id, {
     name: taskName,
-    importance: taskImportance,
-    scheduleTime: taskscheduleTime
+    startTime: taskstartTime,
+    endTime: taskendTime,
+    selectedDays: taskselectedDays,
   });
+
 
   setEdit(false);
 };
@@ -37,7 +49,7 @@ function Task({id,task,importance,scheduleTime,selectedDays,updateTask,deleteTas
         onMouseLeave={() => setShow(false)}
       >
 
-        <div className={`task-container ${taskImportance}`}>
+        <div className={`task-container`}>
 
           <h3 className='task-name'>
             {taskName}
@@ -46,13 +58,10 @@ function Task({id,task,importance,scheduleTime,selectedDays,updateTask,deleteTas
           <div className='task-info'>
 
             <p className='task-deadline'>
-              {taskscheduleTime}
+              {taskstartTime.format("hh:mm A")}
             </p>
             <p className='task-days'>
               {selectedDays.join(', ')}
-            </p>
-            <p className='task-importance'>
-              {taskImportance}
             </p>
           </div>
             {show && (
@@ -73,16 +82,16 @@ function Task({id,task,importance,scheduleTime,selectedDays,updateTask,deleteTas
             value={taskName}
             onChange={(e) => setTaskName(e.target.value)}
           />
-
-          <select
-            value={taskImportance}
-            onChange={(e) => setTaskImportance(e.target.value)}
-          >
-            <option value="high">High</option>
-            <option value="medium">Medium</option>
-            <option value="low">Low</option>
-          </select>
-          <Clock scheduleTime={taskscheduleTime} setScheduleTime={setTaskscheduleTime} />
+          <p>starttime: </p>
+          <Clock scheduleTime={taskstartTime} setScheduleTime={setTaskscheduleTime} />
+          <p>endtime: </p>
+          <Clock scheduleTime={taskendTime} setScheduleTime={setTaskendTime} />
+          <p>selected days: </p>
+          <Repeat
+            days={days}
+            selectedDays={taskselectedDays}
+            toggleDay={toggleDay}
+          />
           <button onClick={handleSave}> Save </button>
         </div>
       )}

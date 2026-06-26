@@ -13,7 +13,6 @@ function Home() {
   const [tasks, setTasks] = useState([]);
   const [flag, setFlag] = useState(false);
   const [name, setName] = useState('');
-  const [importance, setImportance] = useState('low');
   const [startTime, setStartTime] = useState(dayjs());
   const [endTime, setEndTime] = useState(dayjs());
   const [user, setUser] = useState(null);
@@ -119,7 +118,6 @@ function Home() {
     const newTask = {
       id: Date.now(),
       name,
-      importance,
       startTime,
       endTime,
       selectedDays
@@ -128,7 +126,6 @@ function Home() {
     setTasks([...tasks, newTask]);
     setFlag(false);
     setName("");
-    setImportance("low");
     setStartTime(dayjs());
     setEndTime(dayjs());
   };
@@ -182,15 +179,6 @@ const deleteTask = (id) => {
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
-
-          <select
-            value={importance}
-            onChange={(e) => setImportance(e.target.value)}
-          >
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
-          </select>
           <p> start time: </p>
           <Clock scheduleTime={startTime} setScheduleTime={setStartTime} />
           <p> End time: </p>
@@ -215,13 +203,14 @@ const deleteTask = (id) => {
           key={task.id}
           id={task.id}
           task={task.name}
-          importance={task.importance}
-          startTime={task.startTime.format("hh:mm A")}
-          endTime={task.endTime.format("hh:mm A")}
+          startTime={task.startTime}
+          endTime={task.endTime}
           selectedDays={task.selectedDays}
+          toggleDay={toggleDay}
           updateTask={updateTask}
           deleteTask={deleteTask}
         />
+
         ))}
       </div>
       <ScheduleView tasks={tasks} />
