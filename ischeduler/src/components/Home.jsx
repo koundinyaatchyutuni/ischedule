@@ -130,13 +130,49 @@ function Home() {
     setEndTime(dayjs());
   };
 
-  const updateTask = (id, updatedTask) => {
-  setTasks(
-    tasks.map((task) =>
+function updateTask(id, updatedTask) {
+  console.log("updateTask called");
+  console.log(id);
+  console.log(updatedTask);
+
+  const oldTask = tasks.find(task => task.id === id);
+
+  const newSchedule = {};
+    for (const day in schedule) {
+      newSchedule[day] = [...schedule[day]];
+    }
+
+  // Remove old entries
+  for (const day of oldTask.selectedDays) {
+    newSchedule[day] = newSchedule[day].filter(
+      t =>
+        !(
+          t.startTime.isSame(oldTask.startTime) &&
+          t.endTime.isSame(oldTask.endTime)
+        )
+    );
+  }
+
+  // Insert new entries
+  for (const day of updatedTask.selectedDays) {
+    newSchedule[day].push({
+      startTime: updatedTask.startTime,
+      endTime: updatedTask.endTime,
+    });
+
+    newSchedule[day].sort(
+      (a, b) => a.startTime.valueOf() - b.startTime.valueOf()
+    );
+  }
+
+  setSchedule(newSchedule);
+
+  setTasks(tasks =>
+    tasks.map(task =>
       task.id === id ? { ...task, ...updatedTask } : task
     )
   );
-};
+}
 const deleteTask = (id) => {
   setTasks(tasks.filter((task) => task.id !== id));
 }
@@ -206,14 +242,13 @@ const deleteTask = (id) => {
           startTime={task.startTime}
           endTime={task.endTime}
           selectedDays={task.selectedDays}
-          toggleDay={toggleDay}
+          schedule={schedule}
           updateTask={updateTask}
           deleteTask={deleteTask}
         />
-
         ))}
       </div>
-      <ScheduleView tasks={tasks} />
+      {/* <ScheduleView tasks={tasks} /> */}
     </div>
     </>
   );
