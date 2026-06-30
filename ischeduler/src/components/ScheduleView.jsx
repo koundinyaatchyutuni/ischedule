@@ -2,23 +2,20 @@ import React, { useState } from "react";
 import dayjs from "dayjs";
 import "./ScheduleView.css";
 
-const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const days = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
 
-export default function ScheduleView({ tasks }) {
-  const [selectedDay, setSelectedDay] = useState("Mon");
+export default function ScheduleView({ schedule, tasks }) {
+  const [selectedDay, setSelectedDay] = useState('mon');
 
-  const dayTasks = tasks.filter(task =>
-    task.selectedDays.includes(selectedDay)
-  );
+  const daySchedule = schedule[selectedDay] || [];
 
   const startHour = 8;
   const endHour = 22;
-
   const totalMinutes = (endHour - startHour) * 60;
 
   return (
     <div className="schedule-wrapper">
-      <h2>{selectedDay} Schedule</h2>
+      <h2>{selectedDay.toUpperCase()} Schedule</h2>
 
       <div className="day-buttons">
         {days.map(day => (
@@ -33,8 +30,6 @@ export default function ScheduleView({ tasks }) {
       </div>
 
       <div className="schedule">
-
-        {/* Header */}
         <div className="time-header">
           {Array.from(
             { length: (endHour - startHour) / 2 + 1 },
@@ -46,15 +41,17 @@ export default function ScheduleView({ tasks }) {
           ))}
         </div>
 
-        {/* Tasks */}
         <div className="task-area">
-          {dayTasks.map(task => {
+          {daySchedule.map((slot, index) => {
+            const startTime = dayjs(slot.startTime, "HH:mm");
+            const endTime = dayjs(slot.endTime, "HH:mm");
+
             const startMinutes =
-              (task.startTime.hour() - startHour) * 60 +
-              task.startTime.minute();
+              (startTime.hour() - startHour) * 60 +
+              startTime.minute();
 
             const duration =
-              task.endTime.diff(task.startTime, "minute");
+              endTime.diff(startTime, "minute");
 
             const left =
               (startMinutes / totalMinutes) * 100;
@@ -62,21 +59,24 @@ export default function ScheduleView({ tasks }) {
             const width =
               (duration / totalMinutes) * 100;
 
+            const task = tasks.find(
+              t => t.id === slot.taskId
+            );
+
             return (
               <div
-                key={task.id}
-                className={`task-bar ${task.importance}`}
+                key={index}
+                className="task-bar"
                 style={{
                   left: `${left}%`,
                   width: `${width}%`
                 }}
               >
-                {task.name}
+                {task?.name || "Task"}
               </div>
             );
           })}
         </div>
-
       </div>
     </div>
   );

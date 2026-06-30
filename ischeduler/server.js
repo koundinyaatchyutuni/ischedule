@@ -33,9 +33,23 @@ const UserSchema = new mongoose.Schema({
     password: String,
     email: String
 });
+const TimeSlotSchema = new mongoose.Schema({
+    startTime: String,
+    endTime: String
+}, { _id: false });
+
 const TaskSchema = new mongoose.Schema({
     user_name: String,
-    task_list: Array
+    task_list: Array,
+    Schedule: {
+        mon: [TimeSlotSchema],
+        tue: [TimeSlotSchema],
+        wed: [TimeSlotSchema],
+        thu: [TimeSlotSchema],
+        fri: [TimeSlotSchema],
+        sat: [TimeSlotSchema],
+        sun: [TimeSlotSchema]
+    }
 });
 const Task = mongoose.model('tasks', TaskSchema);
 const User = mongoose.model("user", UserSchema);
@@ -57,12 +71,14 @@ app.post('/gettasks', async(req, res) => {
 
         if (usr) {
             return res.status(200).json({
-                tasks: usr.task_list
+                tasks: usr.task_list,
+                schedule: usr.Schedule
             });
         }
 
         return res.status(404).json({
-            tasks: []
+            tasks: [],
+            schedule: []
         });
 
     } catch (err) {
@@ -153,9 +169,14 @@ app.post("/signup", async(req, res) => {
 // to store task details of users in db
 app.post("/savetasks", async(req, res) => {
 
-    const { username, tasks } = req.body;
+    const { username, tasks, schedule } = req.body;
     try {
-        const result = await Task.updateOne({ user_name: username }, { $set: { task_list: tasks } }, { upsert: true });
+        const result = await Task.updateOne({ user_name: username }, {
+            $set: {
+                task_list: tasks,
+                Schedule: schedule
+            }
+        }, { upsert: true });
         console.log("Received tasks:", tasks);
         console.log(result);
         if (result.acknowledged) {

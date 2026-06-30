@@ -16,7 +16,7 @@ function Home() {
   const [startTime, setStartTime] = useState(dayjs());
   const [endTime, setEndTime] = useState(dayjs());
   const [user, setUser] = useState(null);
-  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const days = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
   const [selectedDays, setSelectedDays] = useState([]);
   const [schedule,setSchedule]= useState(Object.fromEntries(days.map(day => [day, []])));
 
@@ -75,6 +75,14 @@ function Home() {
                 );
 
                 setTasks(response.data.tasks);
+                const loadedSchedule = {};
+                for (const day in response.data.schedule) {
+                  loadedSchedule[day] = response.data.schedule[day].map(slot => ({
+                    startTime: dayjs(slot.startTime),
+                    endTime: dayjs(slot.endTime)
+                  }));
+                }
+              setSchedule(loadedSchedule);
             } catch (error) {
                 console.error(error);
             }
@@ -142,7 +150,7 @@ function updateTask(id, updatedTask) {
       newSchedule[day] = [...schedule[day]];
     }
 
-  // Remove old entries
+  // Remove old entries 
   for (const day of oldTask.selectedDays) {
     newSchedule[day] = newSchedule[day].filter(
       t =>
@@ -180,7 +188,7 @@ const deleteTask = (id) => {
     e.preventDefault();
     // setTasks([...tasks]);
     const username = user.username;
-    const responce = await axios.post('http://localhost:3001/savetasks',{ username, tasks });
+    const responce = await axios.post('http://localhost:3001/savetasks',{ username, tasks, schedule });
     if (responce.status === 200) {
       alert("Tasks saved successfully");
     } else {
@@ -234,21 +242,21 @@ const deleteTask = (id) => {
       )}
 
       <div className="tasks-list">
-        {tasks.map((task) => ( 
-          <Task
-          key={task.id}
-          id={task.id}
-          task={task.name}
-          startTime={task.startTime}
-          endTime={task.endTime}
-          selectedDays={task.selectedDays}
-          schedule={schedule}
-          updateTask={updateTask}
-          deleteTask={deleteTask}
-        />
-        ))}
+        {tasks.map((task) => (
+      <Task
+        key={task.id}
+        id={task.id}
+        task={task.name}
+        startTime={dayjs(task.startTime)}
+        endTime={dayjs(task.endTime)}
+        selectedDays={task.selectedDays}
+        schedule={schedule}
+        updateTask={updateTask}
+        deleteTask={deleteTask}
+      />
+      ))}
       </div>
-      {/* <ScheduleView tasks={tasks} /> */}
+      {/* <ScheduleView schedule={schedule} tasks={tasks} /> */}
     </div>
     </>
   );

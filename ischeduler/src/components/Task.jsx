@@ -19,9 +19,7 @@ function Task({
   const [show, setShow] = useState(false);
   const [edit, setEdit] = useState(false);
   const [collision, setCollision] = useState(false);
-
-  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
+  const days = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
   const [taskName, setTaskName] = useState(task);
   const [taskstartTime, setTaskstartTime] = useState(startTime);
   const [taskendTime, setTaskendTime] = useState(endTime);
