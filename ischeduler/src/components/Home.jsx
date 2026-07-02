@@ -79,7 +79,8 @@ function Home() {
                 for (const day in response.data.schedule) {
                   loadedSchedule[day] = response.data.schedule[day].map(slot => ({
                     startTime: dayjs(slot.startTime),
-                    endTime: dayjs(slot.endTime)
+                    endTime: dayjs(slot.endTime),
+                    taskId: slot.taskId
                   }));
                 }
               setSchedule(loadedSchedule);
@@ -102,14 +103,26 @@ function Home() {
     return startTime.isBefore(endTime);
   };
   const addToSchedule = (newTask) => {
-    for (const day of newTask.selectedDays) {
-      const scheduledTasks = schedule[day];
-      const index = scheduledTasks.findIndex(
-        (task) => task.startTime.isAfter(newTask.startTime)
-      );
-      scheduledTasks.splice(index, 0, {startTime: newTask.startTime, endTime: newTask.endTime});
-    }
-  };
+  const newSchedule = { ...schedule };
+
+  for (const day of newTask.selectedDays) {
+    const scheduledTasks = [...newSchedule[day]];
+
+    scheduledTasks.push({
+      startTime: newTask.startTime,
+      endTime: newTask.endTime,
+      taskId: newTask.id
+    });
+
+    scheduledTasks.sort(
+      (a, b) => a.startTime.valueOf() - b.startTime.valueOf()
+    );
+
+    newSchedule[day] = scheduledTasks;
+  }
+
+  setSchedule(newSchedule);
+};
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -156,7 +169,8 @@ function updateTask(id, updatedTask) {
       t =>
         !(
           t.startTime.isSame(oldTask.startTime) &&
-          t.endTime.isSame(oldTask.endTime)
+          t.endTime.isSame(oldTask.endTime) &&
+          t.taskId === oldTask.id
         )
     );
   }
@@ -166,6 +180,7 @@ function updateTask(id, updatedTask) {
     newSchedule[day].push({
       startTime: updatedTask.startTime,
       endTime: updatedTask.endTime,
+      taskId: updatedTask.id
     });
 
     newSchedule[day].sort(
@@ -182,8 +197,18 @@ function updateTask(id, updatedTask) {
   );
 }
 const deleteTask = (id) => {
+  const newSchedule = {};
+
+  for (const day in schedule) {
+    newSchedule[day] = schedule[day].filter(
+      (task) => task.taskId !== id
+    );
+  }
+
+  setSchedule(newSchedule);
+
   setTasks(tasks.filter((task) => task.id !== id));
-}
+};
   const handleSave = async (e)=>{
     e.preventDefault();
     // setTasks([...tasks]);
@@ -256,7 +281,7 @@ const deleteTask = (id) => {
       />
       ))}
       </div>
-      {/* <ScheduleView schedule={schedule} tasks={tasks} /> */}
+      <ScheduleView schedule={schedule} tasks={tasks} />
     </div>
     </>
   );
