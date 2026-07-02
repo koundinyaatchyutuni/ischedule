@@ -13,11 +13,10 @@ function Home() {
   const [tasks, setTasks] = useState([]);
   const [flag, setFlag] = useState(false);
   const [name, setName] = useState('');
-  const [importance, setImportance] = useState('low');
   const [startTime, setStartTime] = useState(dayjs());
   const [endTime, setEndTime] = useState(dayjs());
   const [user, setUser] = useState(null);
-  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const days = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
   const [selectedDays, setSelectedDays] = useState([]);
   const [schedule,setSchedule]= useState(Object.fromEntries(days.map(day => [day, []])));
 
@@ -76,6 +75,15 @@ function Home() {
                 );
 
                 setTasks(response.data.tasks);
+                const loadedSchedule = {};
+                for (const day in response.data.schedule) {
+                  loadedSchedule[day] = response.data.schedule[day].map(slot => ({
+                    startTime: dayjs(slot.startTime),
+                    endTime: dayjs(slot.endTime),
+                    taskId: slot.taskId
+                  }));
+                }
+              setSchedule(loadedSchedule);
             } catch (error) {
                 console.error(error);
             }
@@ -95,14 +103,26 @@ function Home() {
     return startTime.isBefore(endTime);
   };
   const addToSchedule = (newTask) => {
-    for (const day of newTask.selectedDays) {
-      const scheduledTasks = schedule[day];
-      const index = scheduledTasks.findIndex(
-        (task) => task.startTime.isAfter(newTask.startTime)
-      );
-      scheduledTasks.splice(index, 0, {startTime: newTask.startTime, endTime: newTask.endTime});
-    }
-  };
+  const newSchedule = { ...schedule };
+
+  for (const day of newTask.selectedDays) {
+    const scheduledTasks = [...newSchedule[day]];
+
+    scheduledTasks.push({
+      startTime: newTask.startTime,
+      endTime: newTask.endTime,
+      taskId: newTask.id
+    });
+
+    scheduledTasks.sort(
+      (a, b) => a.startTime.valueOf() - b.startTime.valueOf()
+    );
+
+    newSchedule[day] = scheduledTasks;
+  }
+
+  setSchedule(newSchedule);
+};
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -119,7 +139,6 @@ function Home() {
     const newTask = {
       id: Date.now(),
       name,
-      importance,
       startTime,
       endTime,
       selectedDays
@@ -128,26 +147,73 @@ function Home() {
     setTasks([...tasks, newTask]);
     setFlag(false);
     setName("");
-    setImportance("low");
     setStartTime(dayjs());
     setEndTime(dayjs());
   };
 
-  const updateTask = (id, updatedTask) => {
-  setTasks(
-    tasks.map((task) =>
+function updateTask(id, updatedTask) {
+  console.log("updateTask called");
+  console.log(id);
+  console.log(updatedTask);
+
+  const oldTask = tasks.find(task => task.id === id);
+
+  const newSchedule = {};
+    for (const day in schedule) {
+      newSchedule[day] = [...schedule[day]];
+    }
+
+  // Remove old entries 
+  for (const day of oldTask.selectedDays) {
+    newSchedule[day] = newSchedule[day].filter(
+      t =>
+        !(
+          t.startTime.isSame(oldTask.startTime) &&
+          t.endTime.isSame(oldTask.endTime) &&
+          t.taskId === oldTask.id
+        )
+    );
+  }
+
+  // Insert new entries
+  for (const day of updatedTask.selectedDays) {
+    newSchedule[day].push({
+      startTime: updatedTask.startTime,
+      endTime: updatedTask.endTime,
+      taskId: updatedTask.id
+    });
+
+    newSchedule[day].sort(
+      (a, b) => a.startTime.valueOf() - b.startTime.valueOf()
+    );
+  }
+
+  setSchedule(newSchedule);
+
+  setTasks(tasks =>
+    tasks.map(task =>
       task.id === id ? { ...task, ...updatedTask } : task
     )
   );
-};
-const deleteTask = (id) => {
-  setTasks(tasks.filter((task) => task.id !== id));
 }
+const deleteTask = (id) => {
+  const newSchedule = {};
+
+  for (const day in schedule) {
+    newSchedule[day] = schedule[day].filter(
+      (task) => task.taskId !== id
+    );
+  }
+
+  setSchedule(newSchedule);
+
+  setTasks(tasks.filter((task) => task.id !== id));
+};
   const handleSave = async (e)=>{
     e.preventDefault();
     // setTasks([...tasks]);
     const username = user.username;
-    const responce = await axios.post('http://localhost:3001/savetasks',{ username, tasks });
+    const responce = await axios.post('http://localhost:3001/savetasks',{ username, tasks, schedule });
     if (responce.status === 200) {
       alert("Tasks saved successfully");
     } else {
@@ -182,15 +248,6 @@ const deleteTask = (id) => {
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
-
-          <select
-            value={importance}
-            onChange={(e) => setImportance(e.target.value)}
-          >
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
-          </select>
           <p> start time: </p>
           <Clock scheduleTime={startTime} setScheduleTime={setStartTime} />
           <p> End time: </p>
@@ -210,21 +267,21 @@ const deleteTask = (id) => {
       )}
 
       <div className="tasks-list">
-        {tasks.map((task) => ( 
-          <Task
-          key={task.id}
-          id={task.id}
-          task={task.name}
-          importance={task.importance}
-          startTime={task.startTime.format("hh:mm A")}
-          endTime={task.endTime.format("hh:mm A")}
-          selectedDays={task.selectedDays}
-          updateTask={updateTask}
-          deleteTask={deleteTask}
-        />
-        ))}
+        {tasks.map((task) => (
+      <Task
+        key={task.id}
+        id={task.id}
+        task={task.name}
+        startTime={dayjs(task.startTime)}
+        endTime={dayjs(task.endTime)}
+        selectedDays={task.selectedDays}
+        schedule={schedule}
+        updateTask={updateTask}
+        deleteTask={deleteTask}
+      />
+      ))}
       </div>
-      <ScheduleView tasks={tasks} />
+      <ScheduleView schedule={schedule} tasks={tasks} />
     </div>
     </>
   );
