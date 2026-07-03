@@ -175,18 +175,17 @@ function updateTask(id, updatedTask) {
     );
   }
 
-  // Insert new entries
-  for (const day of updatedTask.selectedDays) {
-    newSchedule[day].push({
-      startTime: updatedTask.startTime,
-      endTime: updatedTask.endTime,
-      taskId: updatedTask.id
-    });
+ for (const day of updatedTask.selectedDays) {
+  newSchedule[day].push({
+    startTime: updatedTask.startTime,
+    endTime: updatedTask.endTime,
+    taskId: id
+  });
 
-    newSchedule[day].sort(
-      (a, b) => a.startTime.valueOf() - b.startTime.valueOf()
-    );
-  }
+  newSchedule[day].sort(
+    (a, b) => a.startTime.valueOf() - b.startTime.valueOf()
+  );
+}
 
   setSchedule(newSchedule);
 
