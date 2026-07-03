@@ -63,7 +63,8 @@ export default function ScheduleView({ schedule, tasks }) {
 
             const left = (startMinutes / totalMinutes) * 100;
             const width = (duration / totalMinutes) * 100;
-
+            console.log("slot.taskId:", slot.taskId);
+            console.log("tasks:", tasks);
             const task = tasks.find(
               (t) => t.id === slot.taskId
             );
