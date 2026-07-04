@@ -7,7 +7,7 @@ import {
 import Signup from "./components/Signup";
 import Login from "./components/Login";
 import Home from "./components/Home";
-
+import Profile from "./components/Profile";
 function App() {
 
   const router = createBrowserRouter([
@@ -22,6 +22,10 @@ function App() {
     {
       path: "/login",
       element: <Login />
+    },
+    {
+      path:"/profile",
+      element:<Profile/>
     }
   ]);
 

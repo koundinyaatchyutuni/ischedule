@@ -7,8 +7,10 @@ import Repeat from "./Repeat";
 import Clock from "./Clock";
 import dayjs from "dayjs";
 import ScheduleView from "./ScheduleView";
+import { Link, useNavigate } from 'react-router-dom';
 
 function Home() {
+  const navigate = useNavigate();
 
   const [tasks, setTasks] = useState([]);
   const [flag, setFlag] = useState(false);
@@ -219,20 +221,51 @@ const deleteTask = (id) => {
       alert("Failed to save tasks");
     }
   };
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    setUser(null);
+    navigate("/Login");
+  }
+
   return (
     <>
-    <div className='app-header'>
-      <h1>iScheduler</h1>
-      <img src={profilePic} alt="Profile" style={{
-    width: "80px",
-    height: "80px",
-    borderRadius: "50%",
-    objectFit: "cover",
-    border: "3px solid #fff",
-  }} />
-<p className='user_name' style={{ marginRight: '15px' }}>
-  {user ? user.username : 'Guest'}
-</p>    </div>
+ <div className="app-header">
+  <h1>iScheduler</h1>
+
+  <img
+    src={profilePic}
+    alt="Profile"
+    style={{
+      width: "80px",
+      height: "80px",
+      borderRadius: "50%",
+      objectFit: "cover",
+      border: "3px solid #fff",
+    }}
+  />
+
+  <div className="user-dropdown">
+    <p className="user_name">
+      {user ? user.username : "Guest"}
+    </p>
+
+    <div className="dropdown-menu">
+      <div
+        className="dropdown-item"
+        onClick={() => navigate("/profile")}
+      >
+        Profile
+      </div>
+
+      <div
+        className="dropdown-item"
+        onClick={handleLogout}
+      >
+        Log Out
+      </div>
+    </div>
+  </div>
+</div>
 
     <div className="app-container">
 
