@@ -250,18 +250,20 @@ const deleteTask = (id) => {
     </p>
 
     <div className="dropdown-menu">
-      <div
-        className="dropdown-item"
-        onClick={() => navigate("/profile")}
-      >
-        Profile
-      </div>
+      {user && (
+        <div
+          className="dropdown-item"
+          onClick={() => navigate("/profile")}
+        >
+          Profile
+        </div>
+      )}
 
       <div
         className="dropdown-item"
         onClick={handleLogout}
       >
-        Log Out
+        {user? "Log Out" : "Log In"}
       </div>
     </div>
   </div>

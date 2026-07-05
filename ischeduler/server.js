@@ -89,6 +89,26 @@ app.post('/gettasks', async(req, res) => {
     }
 });
 
+app.post('/getUserInfo', async(req, res) => {
+    const { username } = req.body;
+    try {
+        const usr = await User.findOne({ user_name: username });
+        if (usr) {
+            const decryptedEmail = await bcrypt.decrypto()(usr.email, 10);
+            res.status(200).json({ email: decryptedEmail, password: usr.password });
+        } else {
+            res.status(404).json({ message: "username not found: " + username });
+        }
+    } catch (err) {
+        console.log(err);
+
+        res.status(500).json({
+            status: "error"
+        });
+
+    }
+});
+
 app.post('/finduser', async(req, res) => {
     const { username } = req.body;
     try {
@@ -166,6 +186,46 @@ app.post("/signup", async(req, res) => {
         });
     }
 });
+
+app.post('/updateUser', async(req, res) => {
+    const { oldusername, newusername, email, password } = req.body;
+
+    try {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedEmail = await bcrypt.hash(email, 10);
+        const result = await User.updateOne({ user_name: oldusername }, {
+            $set: {
+                user_name: newusername,
+                email: hashedEmail,
+                password: hashedPassword
+            }
+        });
+
+        if (result.matchedCount === 0) {
+            return res.status(404).json({
+                status: "user not found"
+            });
+        }
+
+        await Task.updateMany({ user_name: oldusername }, {
+            $set: {
+                user_name: newusername
+            }
+        });
+
+        return res.status(200).json({
+            status: "success"
+        });
+
+    } catch (err) {
+        console.log(err);
+
+        return res.status(500).json({
+            status: "error"
+        });
+    }
+});
+
 // to store task details of users in db
 app.post("/savetasks", async(req, res) => {
 
@@ -201,7 +261,7 @@ app.post("/login", async(req, res) => {
         });
 
         if (!user) {
-            return res.status(400).json({
+            return res.status(220).json({
                 message: "User not found"
             });
         }
@@ -212,7 +272,7 @@ app.post("/login", async(req, res) => {
         );
 
         if (!isMatch) {
-            return res.status(400).json({
+            return res.status(220).json({
                 message: "Invalid credentials"
             });
         }
