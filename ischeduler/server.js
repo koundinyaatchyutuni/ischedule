@@ -3,10 +3,12 @@ import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from 'dotenv';
 import jwt from "jsonwebtoken";
-import bcrypt from "bcryptjs";
 import nodemailer from "nodemailer";
+import { encrypt, decrypt } from "./cryptoUtils.js";
+import bcrypt from 'bcryptjs'
 
 dotenv.config();
+
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -94,8 +96,9 @@ app.post('/getUserInfo', async(req, res) => {
     try {
         const usr = await User.findOne({ user_name: username });
         if (usr) {
-            const decryptedEmail = await bcrypt.decrypto()(usr.email, 10);
-            res.status(200).json({ email: decryptedEmail, password: usr.password });
+            //need to add decryption of encrypted email so that user can see when he want to edit the email.
+            const decryptedEmail = decrypt(usr.email);
+            res.status(200).json({ email: decryptedEmail });
         } else {
             res.status(404).json({ message: "username not found: " + username });
         }
@@ -164,9 +167,8 @@ app.post("/signup", async(req, res) => {
         const user = await User.create({
             user_name: username,
             password: await bcrypt.hash(password, 10),
-            email: await bcrypt.hash(email, 10)
+            email: encrypt(email)
         });
-
         if (user) {
             res.json({
                 status: "success"
@@ -176,7 +178,6 @@ app.post("/signup", async(req, res) => {
                 status: "failed"
             });
         }
-        // navigate('/login');
     } catch (err) {
 
         console.log(err);
@@ -191,8 +192,9 @@ app.post('/updateUser', async(req, res) => {
     const { oldusername, newusername, email, password } = req.body;
 
     try {
+        // need to encrypt the new updated password and email user want to update
         const hashedPassword = await bcrypt.hash(password, 10);
-        const hashedEmail = await bcrypt.hash(email, 10);
+        const hashedEmail = encrypt(email);
         const result = await User.updateOne({ user_name: oldusername }, {
             $set: {
                 user_name: newusername,

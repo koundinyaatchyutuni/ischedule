@@ -16,9 +16,30 @@ const [confirmPassword,setConfirmPassword] = useState("");
 const [newUsername,setnewUsername] = useState(username);
 const [newEmail,setNewEmail] = useState(useremail);
 const [passwordError,setPasswordError] = useState("");
+const [oldpassword,setOldPassword]= useState("");
+const [verified,setVerified]=useState(false);
+
 useEffect(()=>{
 loadUser();
 },[]);
+
+const validateOldPassword=async(e)=>{
+  e.preventDefault();
+  try{
+const validateRes=await axios.post('/validatePassword',{
+  username:username,
+  password:oldpassword
+});
+if (validateRes.status===200){
+verified(true);
+}else{
+  alert("Old password is incorrect");
+}
+  }
+catch(err){
+  console.log(err);
+}
+}
 
 const handleEdit=async(e)=>{
 e.preventDefault();
@@ -70,7 +91,8 @@ return <>
 {editMode &&  <form className="edit-form">
   <input type="text" value={newUsername} onChange={(e)=>setnewUsername(e.target.value)} placeholder="Username" />
   <input type="email" value={newEmail} onChange={(e)=>setNewEmail(e.target.value)} placeholder="Email" />
-  <input type="password" value={newPassword} onChange={(e)=>setNewPassword(e.target.value)} placeholder="Password" />
+  <input type="password" value={oldpassword} onChange={(e)=>setOldPassword(e.target.value)} placeholder='OldPassword'/> <button onClick={validateOldPassword}>Validate</button>
+    <input type="password" value={newPassword} onChange={(e)=>setNewPassword(e.target.value)} placeholder="Password" />
   <input type="password" value={confirmPassword} onChange={(e)=>setConfirmPassword(e.target.value)} placeholder="Confirm Password" />
   {passwordError && <p style={{ color: "red" }}>{passwordError}</p>}
   <button type="submit" onClick={handleEdit}>Save</button>
