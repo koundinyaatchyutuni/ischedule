@@ -1,5 +1,5 @@
 import crypto from "crypto";
-
+import dotenv from "dotenv";
 dotenv.config();
 const algorithm = process.env.algorithm;
 
