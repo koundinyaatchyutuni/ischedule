@@ -9,6 +9,7 @@ function Login() {
 
   const [username, setUser] = useState('');
   const [password, setPassword] = useState('');
+  const [loginError, setLoginError] = useState('');
 
   const handlesubmit = async (e) => {
 
@@ -36,13 +37,12 @@ function Login() {
         navigate("/");
       }
       else{
-
-        alert("Invalid Username or Password");
+        setLoginError(result.data.message);
       }
 
     }
     catch(err){
-
+      setLoginError("An error occurred while logging in");
       console.log(err);
     }
   }
@@ -64,7 +64,7 @@ function Login() {
           placeholder="Password"
           onChange={(e) => setPassword(e.target.value)}
         />
-
+        <p style={{ color: "red" }}>{loginError}</p>
         <button type="submit">Login</button>
 
         <Link to="/signup">

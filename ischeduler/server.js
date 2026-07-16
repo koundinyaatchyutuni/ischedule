@@ -3,10 +3,12 @@ import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from 'dotenv';
 import jwt from "jsonwebtoken";
-import bcrypt from "bcryptjs";
 import nodemailer from "nodemailer";
+import { encrypt, decrypt } from "./cryptoUtils.js";
+import bcrypt from 'bcryptjs'
 
 dotenv.config();
+
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -89,6 +91,27 @@ app.post('/gettasks', async(req, res) => {
     }
 });
 
+app.post('/getUserInfo', async(req, res) => {
+    const { username } = req.body;
+    try {
+        const usr = await User.findOne({ user_name: username });
+        if (usr) {
+            //need to add decryption of encrypted email so that user can see when he want to edit the email.
+            const decryptedEmail = decrypt(usr.email);
+            res.status(200).json({ email: decryptedEmail });
+        } else {
+            res.status(404).json({ message: "username not found: " + username });
+        }
+    } catch (err) {
+        console.log(err);
+
+        res.status(500).json({
+            status: "error"
+        });
+
+    }
+});
+
 app.post('/finduser', async(req, res) => {
     const { username } = req.body;
     try {
@@ -144,9 +167,8 @@ app.post("/signup", async(req, res) => {
         const user = await User.create({
             user_name: username,
             password: await bcrypt.hash(password, 10),
-            email: await bcrypt.hash(email, 10)
+            email: encrypt(email)
         });
-
         if (user) {
             res.json({
                 status: "success"
@@ -156,7 +178,6 @@ app.post("/signup", async(req, res) => {
                 status: "failed"
             });
         }
-        // navigate('/login');
     } catch (err) {
 
         console.log(err);
@@ -166,6 +187,47 @@ app.post("/signup", async(req, res) => {
         });
     }
 });
+
+app.post('/updateUser', async(req, res) => {
+    const { oldusername, newusername, email, password } = req.body;
+
+    try {
+        // need to encrypt the new updated password and email user want to update
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedEmail = encrypt(email);
+        const result = await User.updateOne({ user_name: oldusername }, {
+            $set: {
+                user_name: newusername,
+                email: hashedEmail,
+                password: hashedPassword
+            }
+        });
+
+        if (result.matchedCount === 0) {
+            return res.status(404).json({
+                status: "user not found"
+            });
+        }
+
+        await Task.updateMany({ user_name: oldusername }, {
+            $set: {
+                user_name: newusername
+            }
+        });
+
+        return res.status(200).json({
+            status: "success"
+        });
+
+    } catch (err) {
+        console.log(err);
+
+        return res.status(500).json({
+            status: "error"
+        });
+    }
+});
+
 // to store task details of users in db
 app.post("/savetasks", async(req, res) => {
 
@@ -201,7 +263,7 @@ app.post("/login", async(req, res) => {
         });
 
         if (!user) {
-            return res.status(400).json({
+            return res.status(220).json({
                 message: "User not found"
             });
         }
@@ -212,7 +274,7 @@ app.post("/login", async(req, res) => {
         );
 
         if (!isMatch) {
-            return res.status(400).json({
+            return res.status(220).json({
                 message: "Invalid credentials"
             });
         }
