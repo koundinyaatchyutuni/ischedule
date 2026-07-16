@@ -1,11 +1,13 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import { encrypt, decrypt } from "./cryptoUtils.js";
-import { Resend } from "resend";
+import { scheduleTask } from "./schedule.js";
+import nodemailer from "nodemailer";
+import TaskSchedule from "./modles/remSchema.js";
 
 dotenv.config();
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// const resend = new Resend(process.env.RESEND_API_KEY);
 
 // =====================
 // Mongo Schemas
@@ -55,46 +57,14 @@ async function getTasks() {
 // Email Function
 // =====================
 
-async function scheduleMail(email, taskName, startTime, endTime, reminderTime) {
+// async function scheduleMail(email, taskName, startTime, endTime, reminderTime) {
 
-    console.log(`Scheduling reminder for ${email}`);
+//     console.log(`Scheduling reminder for ${email}`);
 
-    console.log(`Reminder Time : ${reminderTime}`);
-    console.log(`Task Starts   : ${startTime}`);
+//     console.log(`Reminder Time : ${reminderTime}`);
+//     console.log(`Task Starts   : ${startTime}`);
 
-    /*
-    Replace this with scheduled sending if you're using Resend scheduling.
-    Right now this sends immediately.
-    */
-
-    const { data, error } = await resend.emails.send({
-        from: "onboarding@resend.dev",
-        to: email,
-        subject: `Reminder: ${taskName}`,
-        html: `
-            <h2>Task Reminder</h2>
-
-            <p>
-                Your task <strong>${taskName}</strong>
-                is scheduled from
-                <strong>${startTime.toLocaleTimeString()}</strong>
-                to
-                <strong>${endTime.toLocaleTimeString()}</strong>.
-            </p>
-
-            <p>
-                This reminder was generated 5 minutes before your task.
-            </p>
-        `,
-        scheduledAt: reminderTime.toISOString()
-    });
-
-    if (error) {
-        console.error(error);
-    } else {
-        console.log(data);
-    }
-}
+// };
 
 // =====================
 // Process Tasks
@@ -113,13 +83,23 @@ async function processTasks(tasks, emailMap, day) {
                 const endTime = new Date(task.endTime);
                 const reminderTime = new Date(startTime);
                 reminderTime.setMinutes(reminderTime.getMinutes() - 5);
-                await scheduleMail(
+                const existing = await TaskSchedule.findOne({
+                    task_name: taskName,
                     email,
-                    taskName,
-                    startTime,
-                    endTime,
                     reminderTime
-                );
+                });
+
+                if (!existing) {
+                    const reminder = await TaskSchedule.create({
+                        task_name: taskName,
+                        email,
+                        startTime,
+                        endTime,
+                        reminderTime
+                    });
+
+                    scheduleTask(reminder);
+                }
             }
 
         }
@@ -131,48 +111,26 @@ async function processTasks(tasks, emailMap, day) {
 // =====================
 
 async function main() {
-
     try {
-
         await mongoose.connect(process.env.mongo_uri);
 
         console.log("MongoDB Connected");
 
         const users = await getUsers();
-
         const tasks = await getTasks();
 
         const emailMap = new Map(
-            users.map(user => [user.user_name, decrypt(user.email)]));
-
-        const days = [
-            "sun",
-            "mon",
-            "tue",
-            "wed",
-            "thu",
-            "fri",
-            "sat"
-        ];
-
-        const today = days[new Date().getDay()];
-
-        await processTasks(
-            tasks,
-            emailMap,
-            today
+            users.map(user => [user.user_name, decrypt(user.email)])
         );
 
+        const days = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+        const today = days[new Date().getDay()];
+
+        await processTasks(tasks, emailMap, today);
+
         console.log("Finished processing reminders.");
-
     } catch (err) {
-
         console.error(err);
-
-    } finally {
-
-        await mongoose.disconnect();
-
     }
 }
 
