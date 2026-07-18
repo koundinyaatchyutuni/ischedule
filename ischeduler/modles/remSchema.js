@@ -9,6 +9,11 @@ const TaskSchema = new mongoose.Schema({
     status: {
         type: String,
         default: "pending"
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now,
+        expires: 82800 // 23 hours in seconds
     }
 });
 
