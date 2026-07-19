@@ -76,7 +76,13 @@ function Home() {
                     }
                 );
 
-                setTasks(response.data.tasks);
+                const loadedTasks = response.data.tasks.map(task => ({
+                  ...task,
+                  startTime: dayjs(task.startTime),
+                  endTime: dayjs(task.endTime)
+                  }));
+
+                setTasks(loadedTasks);
                 const loadedSchedule = {};
                 for (const day in response.data.schedule) {
                   loadedSchedule[day] = response.data.schedule[day].map(slot => ({
@@ -138,13 +144,13 @@ function Home() {
       return;
     }
 
-    const newTask = {
-      id: Date.now(),
-      name,
-      startTime,
-      endTime,
-      selectedDays,
-      remainderEndDate
+   const newTask = {
+    id: crypto.randomUUID(),
+    name,
+    startTime,
+    endTime,
+    selectedDays,
+    remainderEndDate
     };
     addToSchedule(newTask);
     setTasks([...tasks, newTask]);
