@@ -13,6 +13,7 @@ function Task({
   endTime,
   selectedDays,
   schedule,
+  remainderEndDate,
   updateTask,
   deleteTask,
 }) {
@@ -24,7 +25,7 @@ function Task({
   const [taskstartTime, setTaskstartTime] = useState(startTime);
   const [taskendTime, setTaskendTime] = useState(endTime);
   const [taskselectedDays, settaskSelectedDays] = useState(selectedDays);
-
+  const [taskRemainderEndDate, setTaskRemainderEndDate] = useState(remainderEndDate);
   const verifyCollision = (
     newStartTime,
     newEndTime,
@@ -98,145 +99,158 @@ function Task({
       startTime: taskstartTime,
       endTime: taskendTime,
       selectedDays: taskselectedDays,
+      remainderEndDate: taskRemainderEndDate
     });
 
     setEdit(false);
   };
 
   return (
-    <>
-      <div
-        className="task-wrapper"
-        onMouseEnter={() => setShow(true)}
-        onMouseLeave={() => setShow(false)}
-      >
-        <div className="task-container">
-          <h3 className="task-name">{taskName}</h3>
+  <>
+    <div
+      className="task-wrapper"
+      onMouseEnter={() => setShow(true)}
+      onMouseLeave={() => setShow(false)}
+    >
+      <div className="task-container">
 
-          <div className="task-info">
-            <p className="task-deadline">
-              {taskstartTime.format("hh:mm A")}
-            </p>
+        <div className="task-header">
 
-            <p className="task-days">
-              {selectedDays.join(", ")}
+          <div className="task-title-section">
+            <h3 className="task-name">{taskName}</h3>
+
+            <p className="task-time">
+              🕒 {taskstartTime.format("hh:mm A")} - {taskendTime.format("hh:mm A")}
             </p>
           </div>
 
           {show && (
-            <img
-              src={editIcon}
-              alt="Edit"
-              className="edit-icon"
-              onMouseEnter={(e) =>
-                (e.target.style.filter = "brightness(1.2)")
-              }
-              onMouseLeave={(e) =>
-                (e.target.style.filter = "brightness(1)")
-              }
-              onClick={handleEdit}
-              style={{
-                cursor: "pointer",
-                width: "36px",
-                height: "auto",
-                marginLeft: "1.5px",
-                marginRight: "0px",
-              }}
-            />
+            <div className="task-actions">
+
+              <img
+                src={editIcon}
+                alt="Edit"
+                className="action-icon"
+                onClick={handleEdit}
+              />
+
+              <img
+                src={deleteIcon1}
+                alt="Delete"
+                className="action-icon"
+                onMouseEnter={(e) => (e.target.src = deleteIcon2)}
+                onMouseLeave={(e) => (e.target.src = deleteIcon1)}
+                onClick={() => deleteTask(id)}
+              />
+
+            </div>
           )}
+
         </div>
 
-        {show && (
-          <img
-            src={deleteIcon1}
-            alt="Delete"
-            className="delete-icon1"
-            onMouseEnter={(e) =>
-              (e.target.src = deleteIcon2)
-            }
-            onMouseLeave={(e) =>
-              (e.target.src = deleteIcon1)
-            }
-            onClick={() => deleteTask(id)}
+        <div className="task-days">
+          {taskselectedDays.map((day) => (
+            <span
+              key={day}
+              className="day-chip"
+            >
+              {day.toUpperCase()}
+            </span>
+          ))}
+        </div>
+
+        <div className="task-footer">
+
+          <span className="reminder">
+            🔔 Reminder Until
+          </span>
+
+          <span className="reminder-date">
+            {taskRemainderEndDate}
+          </span>
+
+        </div>
+
+      </div>
+    </div>
+
+    {edit && (
+      <div className="edit-form">
+        <input
+          type="text"
+          placeholder="Task name"
+          value={taskName}
+          onChange={(e) => setTaskName(e.target.value)}
+        />
+
+        <p>Start Time:</p>
+
+        <Clock
+          scheduleTime={taskstartTime}
+          setScheduleTime={setTaskstartTime}
+          onChange={(newStartTime) =>
+            verifyCollision(
+              newStartTime,
+              taskendTime,
+              taskselectedDays
+            )
+          }
+        />
+
+        <p>End Time:</p>
+
+        <Clock
+          scheduleTime={taskendTime}
+          setScheduleTime={setTaskendTime}
+          onChange={(newEndTime) =>
+            verifyCollision(
+              taskstartTime,
+              newEndTime,
+              taskselectedDays
+            )
+          }
+        />
+
+        <p>Selected Days:</p>
+
+        <Repeat
+          days={days}
+          selectedDays={taskselectedDays}
+          toggleDay={toggleDay}
+        />
+
+        <p>Reminder End Date:</p>
+
+        <input
+          type="date"
+          value={taskRemainderEndDate}
+          onChange={(e) => setTaskRemainderEndDate(e.target.value)}
+        />
+
+        {collision && (
+          <p
             style={{
-              cursor: "pointer",
-              width: "auto",
-              height: "36px",
+              color: "red",
               marginTop: "10px",
             }}
-          />
-        )}
-      </div>
-
-      {edit && (
-        <div className="edit-form">
-          <input
-            type="text"
-            placeholder="Task name"
-            value={taskName}
-            onChange={(e) => setTaskName(e.target.value)}
-          />
-
-          <p>Start Time:</p>
-
-          <Clock
-            scheduleTime={taskstartTime}
-            setScheduleTime={setTaskstartTime}
-            onChange={(newStartTime) =>
-              verifyCollision(
-                newStartTime,
-                taskendTime,
-                taskselectedDays
-              )
-            }
-          />
-
-          <p>End Time:</p>
-
-          <Clock
-            scheduleTime={taskendTime}
-            setScheduleTime={setTaskendTime}
-            onChange={(newEndTime) =>
-              verifyCollision(
-                taskstartTime,
-                newEndTime,
-                taskselectedDays
-              )
-            }
-          />
-
-          <p>Selected Days:</p>
-
-          <Repeat
-            days={days}
-            selectedDays={taskselectedDays}
-            toggleDay={toggleDay}
-          />
-
-          {collision && (
-            <p
-              style={{
-                color: "red",
-                marginTop: "10px",
-              }}
-            >
-              Time slot overlaps with another task.
-            </p>
-          )}
-
-          <button
-            onClick={handleSave}
-            disabled={collision}
-           style={{
-           cursor: collision ? "not-allowed" : "pointer",
-            }}
           >
-            Save
-          </button>
-        </div>
-      )}
-    </>
-  );
+            Time slot overlaps with another task.
+          </p>
+        )}
+
+        <button
+          onClick={handleSave}
+          disabled={collision}
+          style={{
+            cursor: collision ? "not-allowed" : "pointer",
+          }}
+        >
+          Save
+        </button>
+      </div>
+    )}
+  </>
+);
 }
 
 export default Task;

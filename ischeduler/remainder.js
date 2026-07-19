@@ -1,49 +1,14 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import { encrypt, decrypt } from "./cryptoUtils.js";
-import { scheduleTask } from "./schedule.js";
+import { scheduleTask } from "./utils/schedule.js";
 import nodemailer from "nodemailer";
 import TaskSchedule from "./modles/remSchema.js";
-
+import Task from "./modles/taskSchema.js";
+import User from "./modles/userSchema.js";
+import { days } from "./utils/constElements.js";
 dotenv.config();
 
-// const resend = new Resend(process.env.RESEND_API_KEY);
-
-// =====================
-// Mongo Schemas
-// =====================
-
-const UserSchema = new mongoose.Schema({
-    user_name: String,
-    password: String,
-    email: String
-});
-
-const TimeSlotSchema = new mongoose.Schema({
-    startTime: String,
-    endTime: String
-}, { _id: false });
-
-const TaskSchema = new mongoose.Schema({
-    user_name: String,
-    task_list: Array,
-    Schedule: {
-        mon: [TimeSlotSchema],
-        tue: [TimeSlotSchema],
-        wed: [TimeSlotSchema],
-        thu: [TimeSlotSchema],
-        fri: [TimeSlotSchema],
-        sat: [TimeSlotSchema],
-        sun: [TimeSlotSchema]
-    }
-});
-
-const User = mongoose.model("user", UserSchema);
-const Task = mongoose.model("tasks", TaskSchema);
-
-// =====================
-// Database Functions
-// =====================
 
 async function getUsers() {
     return await User.find().lean();
@@ -53,18 +18,6 @@ async function getTasks() {
     return await Task.find().lean();
 }
 
-// =====================
-// Email Function
-// =====================
-
-// async function scheduleMail(email, taskName, startTime, endTime, reminderTime) {
-
-//     console.log(`Scheduling reminder for ${email}`);
-
-//     console.log(`Reminder Time : ${reminderTime}`);
-//     console.log(`Task Starts   : ${startTime}`);
-
-// };
 
 // =====================
 // Process Tasks
@@ -84,14 +37,14 @@ async function processTasks(tasks, emailMap, day) {
                 const reminderTime = new Date(startTime);
                 reminderTime.setMinutes(reminderTime.getMinutes() - 5);
                 const existing = await TaskSchedule.findOne({
-                    task_name: taskName,
-                    email,
+                    taskId: task.id,
                     reminderTime
                 });
 
                 if (!existing) {
                     const reminder = await TaskSchedule.create({
-                        task_name: taskName,
+                        taskId: task.id,
+                        task_name: task.name,
                         email,
                         startTime,
                         endTime,
@@ -123,7 +76,6 @@ async function main() {
             users.map(user => [user.user_name, decrypt(user.email)])
         );
 
-        const days = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
         const today = days[new Date().getDay()];
 
         await processTasks(tasks, emailMap, today);

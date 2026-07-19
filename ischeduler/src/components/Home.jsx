@@ -21,7 +21,7 @@ function Home() {
   const days = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
   const [selectedDays, setSelectedDays] = useState([]);
   const [schedule,setSchedule]= useState(Object.fromEntries(days.map(day => [day, []])));
-
+  const [remainderEndDate, setRemainderEndDate] = useState(dayjs().add(7, 'day').format('YYYY-MM-DD'));
   // binary search sorted search times 
   const search=(day, startTime, endTime)=>{
     const scheduledTasks = schedule[day];
@@ -76,7 +76,13 @@ function Home() {
                     }
                 );
 
-                setTasks(response.data.tasks);
+                const loadedTasks = response.data.tasks.map(task => ({
+                  ...task,
+                  startTime: dayjs(task.startTime),
+                  endTime: dayjs(task.endTime)
+                  }));
+
+                setTasks(loadedTasks);
                 const loadedSchedule = {};
                 for (const day in response.data.schedule) {
                   loadedSchedule[day] = response.data.schedule[day].map(slot => ({
@@ -138,12 +144,13 @@ function Home() {
       return;
     }
 
-    const newTask = {
-      id: Date.now(),
-      name,
-      startTime,
-      endTime,
-      selectedDays
+   const newTask = {
+    id: crypto.randomUUID(),
+    name,
+    startTime,
+    endTime,
+    selectedDays,
+    remainderEndDate
     };
     addToSchedule(newTask);
     setTasks([...tasks, newTask]);
@@ -151,6 +158,7 @@ function Home() {
     setName("");
     setStartTime(dayjs());
     setEndTime(dayjs());
+    setRemainderEndDate(dayjs().add(7, 'day').format('YYYY-MM-DD'));
   };
 
 function updateTask(id, updatedTask) {
@@ -188,7 +196,7 @@ function updateTask(id, updatedTask) {
     (a, b) => a.startTime.valueOf() - b.startTime.valueOf()
   );
 }
-
+  setRemainderEndDate(updatedTask.remainderEndDate);
   setSchedule(newSchedule);
 
   setTasks(tasks =>
@@ -291,7 +299,8 @@ const deleteTask = (id) => {
         selectedDays={selectedDays}
         toggleDay={toggleDay}
       />
-         
+          <p>Remainder End Date:</p>
+          <input type='date' value={remainderEndDate} onChange={(e) => setRemainderEndDate(e.target.value)} />
           <button type="submit">Submit</button>
           <button type="button" onClick={goBack}>
             Go Back
@@ -309,6 +318,7 @@ const deleteTask = (id) => {
         startTime={dayjs(task.startTime)}
         endTime={dayjs(task.endTime)}
         selectedDays={task.selectedDays}
+        remainderEndDate={task.remainderEndDate}
         schedule={schedule}
         updateTask={updateTask}
         deleteTask={deleteTask}

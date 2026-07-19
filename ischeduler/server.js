@@ -6,6 +6,8 @@ import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
 import { encrypt, decrypt } from "./cryptoUtils.js";
 import bcrypt from 'bcryptjs'
+import Task from "./modles/taskSchema.js";
+import User from "./modles/userSchema.js";
 
 dotenv.config();
 
@@ -30,31 +32,6 @@ mongoose.connect(process.env.mongo_uri)
     .then(() => console.log("MongoDB Connected"))
     .catch(err => console.log(err));
 
-const UserSchema = new mongoose.Schema({
-    user_name: String,
-    password: String,
-    email: String
-});
-const TimeSlotSchema = new mongoose.Schema({
-    startTime: String,
-    endTime: String
-}, { _id: false });
-
-const TaskSchema = new mongoose.Schema({
-    user_name: String,
-    task_list: Array,
-    Schedule: {
-        mon: [TimeSlotSchema],
-        tue: [TimeSlotSchema],
-        wed: [TimeSlotSchema],
-        thu: [TimeSlotSchema],
-        fri: [TimeSlotSchema],
-        sat: [TimeSlotSchema],
-        sun: [TimeSlotSchema]
-    }
-});
-const Task = mongoose.model('tasks', TaskSchema);
-const User = mongoose.model("user", UserSchema);
 
 //need to add this taks recieving in home.jsx
 app.post('/gettasks', async(req, res) => {
