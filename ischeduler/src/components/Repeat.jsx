@@ -2,26 +2,23 @@ import "./Repeat.css";
 
 function Repeat({ days, selectedDays, toggleDay }) {
   return (
-    <div>
+    <div className="repeat-container">
       <h3>Repeat</h3>
 
-      {days.map((day) => (
-        <button
-          key={day}
-          type="button"
-          onClick={() => toggleDay(day)}
-          style={{
-            backgroundColor: selectedDays.includes(day)
-              ? "lightblue"
-              : "white",
-            color: selectedDays.includes(day)
-              ? "white"
-              : "black",
-          }}
-        >
-          {day}
-        </button>
-      ))}
+      <div className="repeat-buttons">
+        {days.map((day) => (
+          <button
+            key={day}
+            type="button"
+            className={`repeat-btn ${
+              selectedDays.includes(day) ? "active" : ""
+            }`}
+            onClick={() => toggleDay(day)}
+          >
+            {day}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
