@@ -1,6 +1,33 @@
-/* * {} */
+.repeat-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
 
-button {
-    margin-left: 1px;
-    border-radius: 5px;
+.repeat-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.repeat-btn {
+    width: 45px;
+    height: 45px;
+    border: none;
+    border-radius: 50%;
+    background: #1e293b;
+    color: white;
+    cursor: pointer;
+    transition: 0.3s;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.repeat-btn:hover {
+    background: #374151;
+}
+
+.repeat-btn.active {
+    background: #4f46e5;
+    color: white;
 }

@@ -22,36 +22,109 @@ function Home() {
   const [selectedDays, setSelectedDays] = useState([]);
   const [schedule,setSchedule]= useState(Object.fromEntries(days.map(day => [day, []])));
   const [remainderEndDate, setRemainderEndDate] = useState(dayjs().add(7, 'day').format('YYYY-MM-DD'));
-  // binary search sorted search times 
-  const search=(day, startTime, endTime)=>{
-    const scheduledTasks = schedule[day];
-    let l=0,h=scheduledTasks.length-1;
-    while(l<=h){
-      const mid=Math.floor((h-l)/2)+l;
-    if (scheduledTasks[mid].endTime.isSame(startTime) || scheduledTasks[mid].endTime.isBefore(startTime)) {
-      l = mid + 1;
+  const [showSchedule, setShowSchedule] = useState(false);
+  const [editTask, setEditTask] = useState(null);
+  const [editName, setEditName] = useState("");
+const [editStartTime, setEditStartTime] = useState(dayjs());
+const [editEndTime, setEditEndTime] = useState(dayjs());
+const [editSelectedDays, setEditSelectedDays] = useState([]);
+const [editReminderEndDate, setEditReminderEndDate] = useState("");
+const [editCollision, setEditCollision] = useState(false);
+  useEffect(() => {
+  if (!editTask) return;
+
+  const collision = verifyCollision(
+    editSelectedDays,
+    editStartTime,
+    editEndTime,
+    editTask.id
+  );
+
+  setEditCollision(collision);
+}, [
+  editStartTime,
+  editEndTime,
+  editSelectedDays,
+  editTask,
+]);
+  const toggleEditDay = (day) => {
+  setEditSelectedDays((prev) =>
+    prev.includes(day)
+      ? prev.filter((d) => d !== day)
+      : [...prev, day]
+  );
+};
+// binary search sorted search times 
+  const search = (day, startTime, endTime, ignoreTaskId = null) => {
+  const scheduledTasks = schedule[day];
+
+  let l = 0;
+  let h = scheduledTasks.length - 1;
+
+  while (l <= h) {
+    const mid = Math.floor((h - l) / 2) + l;
+
+    // Ignore the task currently being edited
+    if (scheduledTasks[mid].taskId === ignoreTaskId) {
+      let i = mid - 1;
+      while (i >= l) {
+        if (
+          scheduledTasks[i].taskId !== ignoreTaskId &&
+          startTime.isBefore(scheduledTasks[i].endTime) &&
+          endTime.isAfter(scheduledTasks[i].startTime)
+        ) {
+          return true;
+        }
+        i--;
+      }
+
+      i = mid + 1;
+      while (i <= h) {
+        if (
+          scheduledTasks[i].taskId !== ignoreTaskId &&
+          startTime.isBefore(scheduledTasks[i].endTime) &&
+          endTime.isAfter(scheduledTasks[i].startTime)
+        ) {
+          return true;
+        }
+        i++;
+      }
+
+      return false;
     }
-    else if (
-      scheduledTasks[mid].startTime.isSame(endTime) ||  scheduledTasks[mid].startTime.isAfter(endTime)
+
+    if (
+      scheduledTasks[mid].endTime.isSame(startTime) ||
+      scheduledTasks[mid].endTime.isBefore(startTime)
+    ) {
+      l = mid + 1;
+    } else if (
+      scheduledTasks[mid].startTime.isSame(endTime) ||
+      scheduledTasks[mid].startTime.isAfter(endTime)
     ) {
       h = mid - 1;
-    }
-    else {
+    } else {
       return true;
     }
-    }
-    return false;
-  };
-  // verify collision for all selected days
-  const verifyCollision=(scheduledays)=>{
-    for (const day of scheduledays) {
-      const scheduledTasks = schedule[day];
-      if (!search(day, startTime, endTime)) {
-        return false;
-      }
-    }
-    return true;
   }
+
+  return false;
+};
+  // verify collision for all selected days
+ const verifyCollision = (
+  daysToCheck,
+  start,
+  end,
+  ignoreTaskId = null
+) => {
+  for (const day of daysToCheck) {
+    if (search(day, start, end, ignoreTaskId)) {
+      return true;
+    }
+  }
+
+  return false;
+};
   const toggleDay = (day) => {
     setSelectedDays((prev) =>
       prev.includes(day)
@@ -139,7 +212,7 @@ function Home() {
       return;
     }
 
-    if (verifyCollision(selectedDays)) {
+   if (verifyCollision(selectedDays,startTime,endTime)) {
       alert("Task time collides with existing tasks");
       return;
     }
@@ -160,7 +233,39 @@ function Home() {
     setEndTime(dayjs());
     setRemainderEndDate(dayjs().add(7, 'day').format('YYYY-MM-DD'));
   };
+const handleEditTask = (task) => {
+  setEditTask(task);
 
+  setEditName(task.name);
+  setEditStartTime(dayjs(task.startTime));
+  setEditEndTime(dayjs(task.endTime));
+  setEditSelectedDays([...task.selectedDays]);
+  setEditReminderEndDate(task.remainderEndDate);
+
+  setEditCollision(false);
+};
+const handleEditSave = () => {
+
+  if (editCollision) {
+    alert("Schedule collision detected");
+    return;
+  }
+
+  if (!editStartTime.isBefore(editEndTime)) {
+    alert("End time must be after start time");
+    return;
+  }
+
+  updateTask(editTask.id, {
+    name: editName,
+    startTime: editStartTime,
+    endTime: editEndTime,
+    selectedDays: editSelectedDays,
+    remainderEndDate: editReminderEndDate,
+  });
+
+  setEditTask(null);
+};
 function updateTask(id, updatedTask) {
   console.log("updateTask called");
   console.log(id);
@@ -196,7 +301,6 @@ function updateTask(id, updatedTask) {
     (a, b) => a.startTime.valueOf() - b.startTime.valueOf()
   );
 }
-  setRemainderEndDate(updatedTask.remainderEndDate);
   setSchedule(newSchedule);
 
   setTasks(tasks =>
@@ -235,100 +339,322 @@ const deleteTask = (id) => {
     navigate("/Login");
   }
 
-  return (
-    <>
- <div className="app-header">
-  <h1>iScheduler</h1>
+return (
+<>
+<div className="home-page">
 
-  <img
-    src={profilePic}
-    alt="Profile"
-    style={{
-      width: "80px",
-      height: "80px",
-      borderRadius: "50%",
-      objectFit: "cover",
-      border: "3px solid #fff",
-    }}
-  />
+  {/* ================= HEADER ================= */}
 
-  <div className="user-dropdown">
-    <p className="user_name">
-      {user ? user.username : "Guest"}
-    </p>
+  <header className="top-navbar">
 
-    <div className="dropdown-menu">
-      {user && (
-        <div
-          className="dropdown-item"
-          onClick={() => navigate("/profile")}
-        >
-          Profile
+    <div className="logo-section">
+      <h1>iScheduler</h1>
+      <p>Smart Daily Planner</p>
+    </div>
+
+    <div className="profile-section">
+
+      <img
+        src={profilePic}
+        alt="profile"
+        className="profile-image"
+      />
+
+      <div className="user-dropdown">
+
+        <div className="profile-info">
+          <span className="username">
+            {user ? user.username : "Guest"}
+          </span>
+
+          <span className="subtitle">
+            Productivity Dashboard
+          </span>
         </div>
+
+        <div className="dropdown-menu">
+
+          {user && (
+            <div
+              className="dropdown-item"
+              onClick={() => navigate("/profile")}
+            >
+              👤 Profile
+            </div>
+          )}
+
+          <div
+            className="dropdown-item"
+            onClick={handleLogout}
+          >
+            🚪 {user ? "Logout" : "Login"}
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </header>
+
+  {/* ================= BODY ================= */}
+
+  <main className="dashboard">
+
+    {/* LEFT PANEL */}
+
+    <aside className="dashboard-left">
+
+      <button
+        className="primary-btn"
+        onClick={onclick}
+      >
+        + Add Task
+      </button>
+
+      <button
+        className="secondary-btn"
+        onClick={handleSave}
+      >
+        💾 Save Schedule
+      </button>
+
+    </aside>
+
+    {/* CENTER */}
+
+    <section className="dashboard-center">
+
+      {/* Weekly Schedule Button */}
+
+      <div className="schedule-top">
+
+        <button
+          className="view-schedule-btn"
+          onClick={() => setShowSchedule(true)}
+        >
+          📅 View Weekly Schedule
+        </button>
+
+      </div>
+
+      {/* Tasks */}
+
+      <div className="tasks-panel">
+
+        <div className="tasks-header">
+
+          <h2>My Tasks</h2>
+
+          <span>{tasks.length} Active</span>
+
+        </div>
+
+        <div className="tasks-list">
+
+          {tasks.map(task => (
+
+<Task
+    key={task.id}
+    id={task.id}
+    task={task.name}
+    startTime={dayjs(task.startTime)}
+    endTime={dayjs(task.endTime)}
+    selectedDays={task.selectedDays}
+    remainderEndDate={task.remainderEndDate}
+    deleteTask={deleteTask}
+    onEdit={() => handleEditTask(task)}
+/>
+
+          ))}
+
+        </div>
+{editTask && (
+  <div className="modal-overlay">
+    <div className="task-form">
+
+      <h2>Edit Task</h2>
+
+      <input
+        type="text"
+        placeholder="Task Name"
+        value={editName}
+        onChange={(e) => setEditName(e.target.value)}
+      />
+
+      <label>Start Time</label>
+
+      <Clock
+        scheduleTime={editStartTime}
+        setScheduleTime={setEditStartTime}
+      />
+
+      <label>End Time</label>
+
+      <Clock
+        scheduleTime={editEndTime}
+        setScheduleTime={setEditEndTime}
+      />
+
+      <label>Repeat</label>
+
+      <Repeat
+        days={days}
+        selectedDays={editSelectedDays}
+        toggleDay={toggleEditDay}
+      />
+
+      <label>Reminder Until</label>
+
+      <input
+        type="date"
+        value={editReminderEndDate}
+        onChange={(e) =>
+          setEditReminderEndDate(e.target.value)
+        }
+      />
+
+      {editCollision && (
+        <p className="collision-text">
+          Time slot overlaps with another task.
+        </p>
       )}
 
-      <div
-        className="dropdown-item"
-        onClick={handleLogout}
-      >
-        {user? "Log Out" : "Log In"}
+      <div className="modal-buttons">
+
+        <button
+          className="secondary-btn"
+          onClick={() => setEditTask(null)}
+        >
+          Cancel
+        </button>
+
+        <button
+          className="primary-btn"
+          onClick={handleEditSave}
+          disabled={editCollision}
+        >
+          Save Changes
+        </button>
+
       </div>
+
     </div>
   </div>
-</div>
+)}
+      </div>
 
-    <div className="app-container">
+    </section>
 
-      <button onClick={onclick}>Add Task</button>
-      <button onClick={handleSave}>Submit</button>
-      {flag && (
-        <form onSubmit={handleSubmit}>
+  </main>
 
-          <input
-            type="text"
-            placeholder="Task name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <p> start time: </p>
-          <Clock scheduleTime={startTime} setScheduleTime={setStartTime} />
-          <p> End time: </p>
-          <Clock scheduleTime={endTime} setScheduleTime={setEndTime} />
+  {/* ================= ADD TASK ================= */}
+
+  {flag && (
+
+    <div className="modal-overlay">
+
+      <div className="task-form">
+
+        <h2>Add New Task</h2>
+
+        <input
+          type="text"
+          placeholder="Task Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+
+        <label>Start Time</label>
+
+        <Clock
+          scheduleTime={startTime}
+          setScheduleTime={setStartTime}
+        />
+
+        <label>End Time</label>
+
+        <Clock
+          scheduleTime={endTime}
+          setScheduleTime={setEndTime}
+        />
+
+        <label>Repeat</label>
+
         <Repeat
-        days={days}
-        selectedDays={selectedDays}
-        toggleDay={toggleDay}
-      />
-          <p>Remainder End Date:</p>
-          <input type='date' value={remainderEndDate} onChange={(e) => setRemainderEndDate(e.target.value)} />
-          <button type="submit">Submit</button>
-          <button type="button" onClick={goBack}>
-            Go Back
+          days={days}
+          selectedDays={selectedDays}
+          toggleDay={toggleDay}
+        />
+
+        <label>Reminder Until</label>
+
+        <input
+          type="date"
+          value={remainderEndDate}
+          onChange={(e) => setRemainderEndDate(e.target.value)}
+        />
+
+        <div className="modal-buttons">
+
+          <button
+            className="secondary-btn"
+            onClick={goBack}
+          >
+            Cancel
           </button>
 
-        </form>
-      )}
+          <button
+            className="primary-btn"
+            onClick={handleSubmit}
+          >
+            Create Task
+          </button>
 
-      <div className="tasks-list">
-        {tasks.map((task) => (
-      <Task
-        key={task.id}
-        id={task.id}
-        task={task.name}
-        startTime={dayjs(task.startTime)}
-        endTime={dayjs(task.endTime)}
-        selectedDays={task.selectedDays}
-        remainderEndDate={task.remainderEndDate}
-        schedule={schedule}
-        updateTask={updateTask}
-        deleteTask={deleteTask}
-      />
-      ))}
+        </div>
+
       </div>
-      <ScheduleView schedule={schedule} tasks={tasks} />
+
     </div>
-    </>
-  );
+
+  )}
+
+  {/* ================= SCHEDULE POPUP ================= */}
+
+  {showSchedule && (
+
+    <div className="schedule-modal">
+
+      <div className="schedule-container">
+
+        <div className="schedule-header">
+
+          <h2>Weekly Schedule</h2>
+
+          <button
+            onClick={() => setShowSchedule(false)}
+            style={{ background: "transparent", border: "none", fontSize: "1.5rem", cursor: "pointer" }}
+          >
+            ❌
+          </button>
+
+        </div>
+
+        <ScheduleView
+          schedule={schedule}
+          tasks={tasks}
+        />
+
+      </div>
+
+    </div>
+
+  )}
+
+</div>
+</>
+);
 }
 
 export default Home;
