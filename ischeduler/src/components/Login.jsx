@@ -10,7 +10,9 @@ function Login() {
   const [username, setUser] = useState('');
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
-
+  const hadleSignup = ()=>{
+    navigate("/signup");
+  }; 
   const handlesubmit = async (e) => {
 
     e.preventDefault();
@@ -67,9 +69,8 @@ function Login() {
         <p style={{ color: "red" }}>{loginError}</p>
         <button type="submit">Login</button>
 
-        <Link to="/signup">
-          <button type="button">Sign Up</button>
-        </Link>
+        <button type="button" onClick={hadleSignup}>Sign Up</button>
+
 
       </form>
 

@@ -1,8 +1,8 @@
 import schedule from "node-schedule";
-import TaskSchedule from "../modles/remSchema.js";
+import Task from "../modles/taskSchema.js"
 import dotenv from 'dotenv';
 import nodemailer from "nodemailer";
-
+import { decrypt } from "./cryptoUtils.js";
 dotenv.config();
 
 const transporter = nodemailer.createTransport({
@@ -28,7 +28,7 @@ export function scheduleTask(task) {
 
         const mailOptions = {
             from: `"iSchedule" <${process.env.EMAIL}>`,
-            to: task.email,
+            to: decrypt(task.email),
             subject: `⏰ Reminder: ${task.task_name}`,
             html: `
 <!DOCTYPE html>
@@ -131,7 +131,7 @@ This reminder was automatically sent by
 
         await transporter.sendMail(mailOptions);
 
-        console.log(`Sending email to ${task.email}`);
+        console.log(`Sending email`);
 
         await TaskSchedule.findByIdAndUpdate(task._id, {
             status: "completed"

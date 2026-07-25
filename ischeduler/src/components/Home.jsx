@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from "react";
 import Task from "./Task";
 import "../App.css";
-import profilePic from '../assets/default log in img.jpg';
+import profilePic from '../assets/mylogo.png';
+import luffy from '../assets/luffy profile image.png';
+import calender_img from '../assets/calender.png';
+import logout from '../assets/logout1.png';
 import axios from "axios";
 import Repeat from "./Repeat";
 import Clock from "./Clock";
 import dayjs from "dayjs";
+
 import ScheduleView from "./ScheduleView";
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -30,7 +34,9 @@ const [editEndTime, setEditEndTime] = useState(dayjs());
 const [editSelectedDays, setEditSelectedDays] = useState([]);
 const [editReminderEndDate, setEditReminderEndDate] = useState("");
 const [editCollision, setEditCollision] = useState(false);
-  useEffect(() => {
+const [isOpen, setIsOpen] = useState(false);
+
+useEffect(() => {
   if (!editTask) return;
 
   const collision = verifyCollision(
@@ -360,40 +366,45 @@ return (
         className="profile-image"
       />
 
-      <div className="user-dropdown">
-
-        <div className="profile-info">
-          <span className="username">
+      
+<div
+    className="user-dropdown"
+    onMouseEnter={() => setIsOpen(true)}
+    onMouseLeave={() => setIsOpen(false)}
+>
+    <div className="profile-info">
+        <span className="username">
             {user ? user.username : "Guest"}
-          </span>
+        </span>
 
-          <span className="subtitle">
-            Productivity Dashboard
-          </span>
-        </div>
+        <span className="subtitle">
+            Productivity Dashboard {isOpen ? "🔺" : "🔻"}
+        </span>
+    </div>
 
-        <div className="dropdown-menu">
-
-          {user && (
+    <div className={`dropdown-menu ${isOpen ? "show" : ""}`}>
+        {user && (
             <div
-              className="dropdown-item"
-              onClick={() => navigate("/profile")}
+                className="dropdown-item"
+                onClick={() => navigate("/profile")}
             >
-              👤 Profile
+                <spam style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <img src={luffy} alt="👻" style={{ width: "40px", height: "40px"}} /> Profile
+                </spam>
             </div>
-          )}
+        )}
 
-          <div
+        <div
             className="dropdown-item"
             onClick={handleLogout}
-          >
-            🚪 {user ? "Logout" : "Login"}
-          </div>
-
+        >
+          <spam style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <img src={logout} alt="Logout" style={{ width: "30px", height: "25px", marginLeft: "8px"}} />
+            {user ? "Logout" : "Login"}
+            </spam>
         </div>
-
-      </div>
-
+    </div>
+</div>
     </div>
 
   </header>
@@ -420,30 +431,24 @@ return (
         💾 Save Schedule
       </button>
 
+        <button
+  className="view-schedule-btn"
+  onClick={() => setShowSchedule(true)}
+>
+  <span className="btn-icon"><img src={calender_img} alt="🗓️" style={{ width: "24px", height: "24px"}} /></span>
+  <span>View Weekly Schedule</span>
+</button>
     </aside>
 
     {/* CENTER */}
 
     <section className="dashboard-center">
 
-      {/* Weekly Schedule Button */}
-
-      <div className="schedule-top">
-
-        <button
-          className="view-schedule-btn"
-          onClick={() => setShowSchedule(true)}
-        >
-          📅 View Weekly Schedule
-        </button>
-
-      </div>
-
       {/* Tasks */}
 
       <div className="tasks-panel">
 
-        <div className="tasks-header">
+        <div className="tasks-header" >
 
           <h2>My Tasks</h2>
 
@@ -451,7 +456,7 @@ return (
 
         </div>
 
-        <div className="tasks-list">
+        <div className="tasks-list" style={{ marginTop: "10px" }}>
 
           {tasks.map(task => (
 
@@ -634,7 +639,7 @@ return (
 
           <button
             onClick={() => setShowSchedule(false)}
-            style={{ background: "transparent", border: "none", fontSize: "1.5rem", cursor: "pointer" }}
+            className="close-btn"
           >
             ❌
           </button>
