@@ -4,7 +4,7 @@ import cors from "cors";
 import dotenv from 'dotenv';
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
-import { encrypt, decrypt } from "./cryptoUtils.js";
+import { encrypt, decrypt } from "./utils/cryptoUtils.js";
 import bcrypt from 'bcryptjs'
 import Task from "./modles/taskSchema.js";
 import User from "./modles/userSchema.js";

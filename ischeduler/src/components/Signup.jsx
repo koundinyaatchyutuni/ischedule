@@ -125,7 +125,7 @@ const handleVerifyOtp=()=>{
   return (
     <div className='signup-container'>
 
-      <h2>Sign Up</h2>
+      <h2 style={{color:'white'}}>Sign Up</h2>
 
       <form onSubmit={handlesubmit}>
 

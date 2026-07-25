@@ -1,7 +1,8 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import { encrypt, decrypt } from "./cryptoUtils.js";
+// import { encrypt, decrypt } from "./utils/cryptoUtils.js";
 import { scheduleTask } from "./utils/schedule.js";
+import { cleanUpExpiredTasks } from "./utils/cleanUpExpiredTasks.js";
 import nodemailer from "nodemailer";
 import TaskSchedule from "./modles/remSchema.js";
 import Task from "./modles/taskSchema.js";
@@ -68,12 +69,12 @@ async function main() {
         await mongoose.connect(process.env.mongo_uri);
 
         console.log("MongoDB Connected");
-
+        await cleanUpExpiredTasks();
         const users = await getUsers();
         const tasks = await getTasks();
 
         const emailMap = new Map(
-            users.map(user => [user.user_name, decrypt(user.email)])
+            users.map(user => [user.user_name, user.email])
         );
 
         const today = days[new Date().getDay()];

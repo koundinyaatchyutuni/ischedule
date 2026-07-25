@@ -7,19 +7,37 @@ const days = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
 export default function ScheduleView({ schedule, tasks }) {
   const [selectedDay, setSelectedDay] = useState("mon");
   const [currentTime, setCurrentTime] = useState(dayjs());
+  const [labelGap, setLabelGap] = useState(2);
 
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(dayjs());
-    }, 60000); // update every minute
+    }, 60000);
 
     return () => clearInterval(timer);
   }, []);
 
+  // Responsive label spacing
+  useEffect(() => {
+    const updateLabelGap = () => {
+      const width = window.innerWidth;
+
+      if (width >= 1400) setLabelGap(2);
+      else if (width >= 1100) setLabelGap(3);
+      else if (width >= 850) setLabelGap(4);
+      else setLabelGap(6);
+    };
+
+    updateLabelGap();
+
+    window.addEventListener("resize", updateLabelGap);
+    return () => window.removeEventListener("resize", updateLabelGap);
+  }, []);
+
   const daySchedule = schedule[selectedDay] || [];
 
-  const startHour = 8;
-  const endHour = 22;
+  const startHour = 4;
+  const endHour = 24;
   const totalMinutes = (endHour - startHour) * 60;
 
   const currentMinutes =
@@ -40,6 +58,12 @@ export default function ScheduleView({ schedule, tasks }) {
     return "#8E24AA";
   };
 
+  // Generate header labels
+  const hours = [];
+  for (let h = startHour; h <= endHour; h += labelGap) {
+    hours.push(h);
+  }
+
   return (
     <div className="schedule-wrapper">
       <h2>{selectedDay.toUpperCase()} Schedule</h2>
@@ -57,11 +81,13 @@ export default function ScheduleView({ schedule, tasks }) {
       </div>
 
       <div className="schedule">
-        <div className="time-header">
-          {Array.from(
-            { length: (endHour - startHour) / 2 + 1 },
-            (_, i) => startHour + i * 2
-          ).map((hour) => (
+        <div
+          className="time-header"
+          style={{
+            gridTemplateColumns: `repeat(${hours.length}, 1fr)`,
+          }}
+        >
+          {hours.map((hour) => (
             <div key={hour} className="time-label">
               {dayjs().hour(hour).minute(0).format("h A")}
             </div>
@@ -69,7 +95,6 @@ export default function ScheduleView({ schedule, tasks }) {
         </div>
 
         <div className="task-area">
-
           {/* Current Time Indicator */}
           {currentTime.hour() >= startHour &&
             currentTime.hour() <= endHour && (
@@ -96,8 +121,6 @@ export default function ScheduleView({ schedule, tasks }) {
 
             const task = tasks.find((t) => t.id === slot.taskId);
 
-            const backgroundColor = getTaskColor(startTime.hour());
-
             return (
               <div
                 key={index}
@@ -105,7 +128,7 @@ export default function ScheduleView({ schedule, tasks }) {
                 style={{
                   left: `${left}%`,
                   width: `${width}%`,
-                  backgroundColor,
+                  backgroundColor: getTaskColor(startTime.hour()),
                 }}
                 title={`${task?.name || "Task"} • ${startTime.format(
                   "hh:mm A"
