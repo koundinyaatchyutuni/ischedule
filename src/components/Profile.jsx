@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Link,useNavigate } from "react-router-dom";
 import "./Profile.css";
 import axios from "axios";
-
+import profilePic from '../assets/image.png';
 
 function Profile() {
 const navigate = useNavigate();
@@ -88,24 +88,134 @@ const responce=await axios.get('/getUserInfo', {
   }
 };
 
-return <>
-{editMode &&  <form className="edit-form">
-  <input type="text" value={newUsername} onChange={(e)=>setnewUsername(e.target.value)} placeholder="Username" />
-  <input type="email" value={newEmail} onChange={(e)=>setNewEmail(e.target.value)} placeholder="Email" />
-  <input type="password" value={oldpassword} onChange={(e)=>setOldPassword(e.target.value)} placeholder='OldPassword'/> <button onClick={validateOldPassword}>Validate</button>
-    <input type="password" value={newPassword} onChange={(e)=>setNewPassword(e.target.value)} placeholder="Password" />
-  <input type="password" value={confirmPassword} onChange={(e)=>setConfirmPassword(e.target.value)} placeholder="Confirm Password" />
-  {passwordError && <p style={{ color: "red" }}>{passwordError}</p>}
-  <button type="submit" onClick={handleEdit}>Save</button>
-  </form>}
-<div className="profile">
-  <div><h2>{username}</h2></div>
-  <div><h3>{useremail}</h3></div>
-  <div><h3>{password}</h3></div>
-  <button onClick={()=>setEditMode(!editMode)}>Edit</button>
-  <button onClick={()=>navigate("/")}>Home</button>
-</div>
-</>
-};
+return (
+  <>
+<header className="top-navbar">
+
+    <div className="logo-section">
+        <h1>iScheduler</h1>
+        <p>Smart Daily Planner</p>
+    </div>
+
+    <div className="profile-section">
+
+        <img
+            src={profilePic}
+            alt="profile"
+            className="profile-image"
+        />
+
+        <div className="profile-details">
+            <h3>{username}</h3>
+            <p>Productivity Dashboard</p>
+        </div>
+
+    </div>
+
+</header>
+    {editMode && (
+      <div className="overlay">
+        <form className="edit-form">
+          <h2>Edit Profile</h2>
+
+          <input
+            type="text"
+            value={newUsername}
+            onChange={(e) => setnewUsername(e.target.value)}
+            placeholder="Username"
+          />
+
+          <input
+            type="email"
+            value={newEmail}
+            onChange={(e) => setNewEmail(e.target.value)}
+            placeholder="Email"
+          />
+
+          <div className="password-row">
+            <input
+              type="password"
+              value={oldpassword}
+              onChange={(e) => setOldPassword(e.target.value)}
+              placeholder="Current Password"
+            />
+            <button
+              type="button"
+              className="validate-btn"
+              onClick={validateOldPassword}
+            >
+              Validate
+            </button>
+          </div>
+
+          <input
+            type="password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            placeholder="New Password"
+          />
+
+          <input
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="Confirm Password"
+          />
+
+          {passwordError && (
+            <p className="error">{passwordError}</p>
+          )}
+
+          <div className="form-buttons">
+            <button type="submit" onClick={handleEdit}>
+              Save Changes
+            </button>
+
+            <button
+              type="button"
+              className="cancel-btn"
+              onClick={() => setEditMode(false)}
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    )}
+
+    <div className="profile">
+      <div className="profile-card">
+        <div className="avatar">
+          {username?.charAt(0).toUpperCase()}
+        </div>
+
+        <h2>{username}</h2>
+
+        <div className="info-box">
+          <label>Email</label>
+          <p>{useremail}</p>
+        </div>
+
+        <div className="info-box">
+          <label>Password</label>
+          <p>••••••••••••</p>
+        </div>
+
+        <div className="profile-buttons">
+          <button onClick={() => setEditMode(true)}>
+            Edit Profile
+          </button>
+
+          <button
+            className="home-btn"
+            onClick={() => navigate("/")}
+          >
+            Home
+          </button>
+        </div>
+      </div>
+    </div>
+  </>
+)};
 
 export default Profile;
