@@ -1,10 +1,172 @@
 .profile {
+    min-height: calc(100vh - 70px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    background: #f5f7fb;
+}
+
+.profile-card {
+    width: 420px;
+    background: white;
+    border-radius: 20px;
+    padding: 35px;
+    text-align: center;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.12);
+}
+
+.avatar {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #5b7fff, #8b5cf6);
+    color: white;
+    font-size: 36px;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: auto;
+    margin-bottom: 20px;
+}
+
+.profile-card h2 {
+    margin-bottom: 30px;
+    color: #222;
+}
+
+.info-box {
+    text-align: left;
+    background: #f7f8fc;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 18px;
+}
+
+.info-box label {
+    font-size: 13px;
+    color: #777;
+    display: block;
+    margin-bottom: 6px;
+}
+
+.info-box p {
+    font-size: 17px;
+    color: #222;
+    margin: 0;
+    word-break: break-word;
+}
+
+.profile-buttons {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.profile-buttons button {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    color: white;
+    background: #4f46e5;
+    font-size: 15px;
+    transition: .25s;
+}
+
+.profile-buttons button:hover {
+    transform: translateY(-2px);
+}
+
+.home-btn {
+    background: #374151 !important;
+}
+
+
+/* ---------- Popup ---------- */
+
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .45);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.edit-form {
+    width: 450px;
+    background: white;
+    border-radius: 18px;
+    padding: 30px;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    background: linear-gradient(135deg, #080808, #343436);
+    gap: 15px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, .25);
+}
+
+.edit-form h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.edit-form input {
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    outline: none;
+    font-size: 15px;
+}
+
+.edit-form input:focus {
+    border-color: #4f46e5;
+}
+
+.password-row {
+    display: flex;
+    gap: 10px;
+}
+
+.password-row input {
+    flex: 1;
+}
+
+.validate-btn {
+    width: 110px;
+    border: none;
+    border-radius: 10px;
+    background: #16a34a;
     color: white;
-    padding: 30px;
+    cursor: pointer;
+}
+
+.form-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.form-buttons button {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    background: #4f46e5;
+    color: white;
+    font-size: 15px;
+}
+
+.cancel-btn {
+    background: #6b7280 !important;
+}
+
+.error {
+    color: #ef4444;
+    text-align: center;
+    margin: 0;
 }

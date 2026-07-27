@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Task from "./Task";
 import "../App.css";
-import profilePic from '../assets/mylogo.png';
+import profilePic from '../assets/image.png';
 import luffy from '../assets/luffy profile image.png';
 import calender_img from '../assets/calender.png';
 import logout from '../assets/logout1.png';

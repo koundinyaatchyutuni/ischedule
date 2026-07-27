@@ -1,203 +1,626 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useRef } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import './Signup.css';
+import "./Signup.css";
 
 const Signup = () => {
 
-  const navigate = useNavigate();
+    const navigate = useNavigate();
 
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [usernameError, setUsernameError] = useState('');
-  const [passwordError, setPasswordError] = useState('');
-  const [helperText, setHelperText] = useState('');
-  const[usermail,setUsermail]=useState('');
-  const [showVerifyButton,setShowVerifyButton]=useState(false);
-  const [showOtpInput,setShowOtpInput]=useState(false);
-  const [otp,setOtp]=useState('');
-  const [sentOtp,setSentOtp]=useState('');
-  const [allowSignup,setallowSignup]=useState(false);
+    // ---------------- User Data ----------------
 
+    const [username, setUsername] = useState("");
+    const [usermail, setUsermail] = useState("");
+    const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
 
-  const finduser = async (username) => {
-    try {
-      const result = await axios.post(
-        'http://localhost:3001/finduser',
-        { username }
-      );
+    // ---------------- OTP ----------------
 
-      return result.data;
+    const [otp, setOtp] = useState("");
+    const [sentOtp, setSentOtp] = useState("");
 
-    } catch (error) {
-      console.error("Error finding user:", error);
+    const [showVerifyButton, setShowVerifyButton] = useState(false);
+    const [showOtpInput, setShowOtpInput] = useState(false);
+    const [allowSignup, setAllowSignup] = useState(false);
 
-      return {
-        status: "error"
-      };
-    }
-  };
+    // ---------------- Status ----------------
 
-  const handleUsernameChange = async (e) => {
+    const [usernameStatus, setUsernameStatus] = useState({
+        type: "",
+        message: ""
+    });
 
-    const value = e.target.value;
+    const [emailStatus, setEmailStatus] = useState({
+        type: "",
+        message: ""
+    });
 
-    setUsername(value);
+    const [passwordStatus, setPasswordStatus] = useState({
+        type: "",
+        message: ""
+    });
 
-    const data = await finduser(value);
+    // used for debouncing username API calls
+    const usernameTimer = useRef(null);
 
-    if (data.status === "exists") {
-      setUsernameError("Username already exists");
-      setHelperText("red");
-    }
-    else {
-      setUsernameError("username is available");
-      setHelperText("blue");
-    }
-  };
+    //----------------------------------------------------
+    // Auto hide SUCCESS messages after 2.5 sec
+    //----------------------------------------------------
 
-  const handleVerifyEmail = async () => {
-    try{
-      const result = await axios.post(
-        'http://localhost:3001/sendotp',
-        { email: usermail }
-      );
-      if (result.status===200){
-        // alert("OTP sent to email");
-        setShowOtpInput(true);
-        setSentOtp(result.data.otp);
-      }else{
-        alert("Failed to send OTP");
-      }
-    }
-    catch(error){
-      console.error("Error verifying email:", error);
-    }
-  };
+    const showTemporaryStatus = (setter, status) => {
 
-const handleVerifyOtp=()=>{
-  if (String(otp) === String(sentOtp)) {
-  setallowSignup(true);
-  setShowOtpInput(false);
-  setShowVerifyButton(false);
-}
-}
+        setter(status);
 
-  const handlesubmit = async (e) => {
+        if (status.type === "success") {
 
-    e.preventDefault();
+            setTimeout(() => {
 
-    if (password !== confirmPassword) {
-      alert("Passwords do not match");
-      return;
-    }
+                setter(prev => {
 
-    if (username === '' || password === '') {
-      alert("Username and Password cannot be empty");
-      return;
-    }
+                    if (prev.type === "success") {
 
-    try {
+                        return {
+                            type: "",
+                            message: ""
+                        };
 
-      const result = await axios.post(
-        'http://localhost:3001/signup',
-        {
-          username,
-          password,
-          email:usermail
+                    }
+
+                    return prev;
+
+                });
+
+            }, 2500);
         }
-      );
+    };
 
-      if (result.data.status === "success") {
-        alert("User registered successfully");
-        navigate("/Login");
-      }
-      else {
-        alert("User registration failed");
-      }
+    //----------------------------------------------------
+    // Find User
+    //----------------------------------------------------
 
-    } catch (error) {
-      console.log(error);
-    }
-  };
+    const finduser = async (username) => {
 
-  return (
-    <div className='signup-container'>
+        try {
 
-      <h2 style={{color:'white'}}>Sign Up</h2>
+            const result = await axios.post(
+                "http://localhost:3001/finduser",
+                { username }
+            );
 
-      <form onSubmit={handlesubmit}>
+            return result.data;
 
-        <input
-          type="text"
-          placeholder="Username"
-          value={username}
-          onChange={handleUsernameChange}
-          style={{
-            borderColor: helperText}
-          }
-        />
-        <div>
-        <input type="email" placeholder="Email" onChange={(e) => {setUsermail(e.target.value); setShowVerifyButton(true)}} required />
-        {showVerifyButton && <button type="button" onClick={handleVerifyEmail}>verify</button>}
-        {showOtpInput && (
-          <div>
-            <input type="text" placeholder="Enter OTP" onChange={(e) => setOtp(e.target.value)} required />
-            <button type="button" onClick={handleVerifyOtp}>Submit OTP</button>
-          </div>
-        )}
-        </div>
-        <p className='error-message' style={{ color: helperText === 'red' ? 'red' : 'green' }}>
-          {usernameError}
-        </p>
+        }
+        catch (err) {
 
-        <input
-          type="password"
-          placeholder="Password"
-          onChange={(e) => setPassword(e.target.value)}
-        />
+            console.log(err);
 
-        <input
-          type="password"
-          placeholder="Confirm Password"
-          onChange={(e) => {
+            return {
+                status: "error"
+            };
 
-            setConfirmPassword(e.target.value);
+        }
 
-            if (password !== e.target.value) {
-              setPasswordError("Passwords do not match");
+    };
+
+    //----------------------------------------------------
+    // Username Validation
+    //----------------------------------------------------
+
+    const handleUsernameChange = (e) => {
+
+        const value = e.target.value;
+
+        setUsername(value);
+
+        if (usernameTimer.current) {
+
+            clearTimeout(usernameTimer.current);
+
+        }
+
+        // Don't validate empty username
+
+        if (value.trim() === "") {
+
+            setUsernameStatus({
+                type: "",
+                message: ""
+            });
+
+            return;
+
+        }
+
+        usernameTimer.current = setTimeout(async () => {
+
+            const data = await finduser(value);
+
+            if (data.status === "exists") {
+
+                setUsernameStatus({
+                    type: "error",
+                    message: "Username already exists"
+                });
+
             }
             else {
-              setPasswordError("");
+
+                showTemporaryStatus(
+                    setUsernameStatus,
+                    {
+                        type: "success",
+                        message: "Username available"
+                    }
+                );
+
             }
-          }}
-          style={{
-            borderColor: passwordError ? 'red' : ''
-          }}
-        />
 
-        <p className='error-message' style={{ color: helperText === 'red' ? 'red' : 'green' }}>
-          {passwordError}
-        </p>
+        }, 500);
 
-        <Link to='/Login'>
-          Already have an account? Log in
-        </Link>
+    };
 
-        <button type="submit" disabled={!allowSignup} onMouseOver={(e) => {
-          if (!allowSignup) {
-            e.target.style.cursor = "not-allowed";
-          } else {
-            e.target.style.cursor = "pointer";        
-          }
-        }}>
-          Sign Up
-        </button>
+    //----------------------------------------------------
+    // Email Validation
+    //----------------------------------------------------
 
-      </form>
-    </div>
-  );
+    const validateEmail = (email) => {
+
+        setUsermail(email);
+
+        if (email.trim() === "") {
+
+            setEmailStatus({
+                type: "",
+                message: ""
+            });
+
+            setShowVerifyButton(false);
+
+            return;
+
+        }
+
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!regex.test(email)) {
+
+            setEmailStatus({
+                type: "error",
+                message: "Invalid email address"
+            });
+
+            setShowVerifyButton(false);
+
+            return;
+
+        }
+
+        showTemporaryStatus(
+            setEmailStatus,
+            {
+                type: "success",
+                message: "Valid email"
+            }
+        );
+
+        setShowVerifyButton(true);
+
+    };
+
+    //----------------------------------------------------
+    // Password Validation
+    //----------------------------------------------------
+
+    const validatePassword = (pass, confirm) => {
+
+    if(pass===""){
+        setPasswordStatus({
+            type:"",
+            message:""
+        });
+        return;
+    }
+
+    if(pass.length<8){
+        setPasswordStatus({
+            type:"error",
+            message:"Password must be at least 8 characters."
+        });
+        return;
+    }
+
+    if(confirm===""){
+        setPasswordStatus({
+            type:"",
+            message:""
+        });
+        return;
+    }
+
+    if(pass!==confirm){
+        setPasswordStatus({
+            type:"error",
+            message:"Passwords do not match."
+        });
+        return;
+    }
+
+    showTemporaryStatus(setPasswordStatus,{
+        type:"success",
+        message:"Passwords match"
+    });
+
+};
+      //----------------------------------------------------
+    // Send OTP
+    //----------------------------------------------------
+
+    const handleVerifyEmail = async () => {
+
+        if (emailStatus.type === "error" || usermail.trim() === "") {
+            return;
+        }
+
+        try {
+
+            const result = await axios.post(
+                "http://localhost:3001/sendotp",
+                {
+                    email: usermail
+                }
+            );
+
+            if (result.status === 200) {
+
+                setSentOtp(result.data.otp);
+
+                setShowOtpInput(true);
+
+                showTemporaryStatus(
+                    setEmailStatus,
+                    {
+                        type: "success",
+                        message: "OTP sent successfully"
+                    }
+                );
+
+            }
+
+        }
+        catch (err) {
+
+            console.log(err);
+
+            setEmailStatus({
+                type: "error",
+                message: "Unable to send OTP"
+            });
+
+        }
+
+    };
+
+    //----------------------------------------------------
+    // Verify OTP
+    //----------------------------------------------------
+
+    const handleVerifyOtp = () => {
+
+        if (otp.trim() === "") {
+
+            setEmailStatus({
+                type: "error",
+                message: "Enter OTP"
+            });
+
+            return;
+
+        }
+
+        if (String(otp) === String(sentOtp)) {
+
+            setAllowSignup(true);
+
+            setShowOtpInput(false);
+
+            setShowVerifyButton(false);
+
+            showTemporaryStatus(
+                setEmailStatus,
+                {
+                    type: "success",
+                    message: "Email verified"
+                }
+            );
+
+        }
+        else {
+
+            setEmailStatus({
+                type: "error",
+                message: "Incorrect OTP"
+            });
+
+        }
+
+    };
+
+    //----------------------------------------------------
+    // Submit
+    //----------------------------------------------------
+
+    const handleSubmit = async (e) => {
+
+        e.preventDefault();
+
+        if (username.trim() === "") {
+
+            setUsernameStatus({
+                type: "error",
+                message: "Username required"
+            });
+
+            return;
+
+        }
+
+        if (usermail.trim() === "") {
+
+            setEmailStatus({
+                type: "error",
+                message: "Email required"
+            });
+
+            return;
+
+        }
+
+        if (password === "") {
+
+            setPasswordStatus({
+                type: "error",
+                message: "Password required"
+            });
+
+            return;
+
+        }
+
+        if (password !== confirmPassword) {
+
+            setPasswordStatus({
+                type: "error",
+                message: "Passwords do not match"
+            });
+
+            return;
+
+        }
+
+        if (!allowSignup) {
+
+            setEmailStatus({
+                type: "error",
+                message: "Verify your email first"
+            });
+
+            return;
+
+        }
+
+        try {
+
+            const result = await axios.post(
+                "http://localhost:3001/signup",
+                {
+                    username,
+                    password,
+                    email: usermail
+                }
+            );
+
+            if (result.data.status === "success") {
+
+                navigate("/Login");
+
+            }
+            else {
+
+                alert("Registration failed");
+
+            }
+
+        }
+        catch (err) {
+
+            console.log(err);
+
+        }
+
+    };
+
+    return (
+        <div className="signup-container">
+
+            <div className="signup-card">
+
+                <h1>Create Account</h1>
+
+                <p className="subtitle">
+                    Start planning your day with iScheduler
+                </p>
+
+                <form onSubmit={handleSubmit}>
+
+                    {/* Username */}
+
+                    <div className="input-group">
+
+                        <input
+                            type="text"
+                            placeholder="Username"
+                            value={username}
+                            onChange={handleUsernameChange}
+                            className={usernameStatus.type}
+                        />
+
+                        {
+                            usernameStatus.type === "success" &&
+                            <span className="success-icon">✓</span>
+                        }
+
+                    </div>
+
+                    {
+                        usernameStatus.type === "error" &&
+                        <p className="status error">
+                            {usernameStatus.message}
+                        </p>
+                    }
+
+                    {/* Email */}
+
+                    <div className="input-group">
+
+                        <input
+                            type="email"
+                            placeholder="Email Address"
+                            value={usermail}
+                            onChange={(e) => validateEmail(e.target.value)}
+                            className={emailStatus.type}
+                        />
+
+                        {
+                            showVerifyButton &&
+                            <button
+                                type="button"
+                                className="verify-btn"
+                                onClick={handleVerifyEmail}
+                            >
+                                Verify
+                            </button>
+                        }
+
+                        {
+                            emailStatus.type === "success" &&
+                            !showVerifyButton &&
+                            <span className="success-icon">
+                                ✓
+                            </span>
+                        }
+
+                    </div>
+
+                    {
+                        emailStatus.type === "error" &&
+                        <p className="status error">
+                            {emailStatus.message}
+                        </p>
+                    }
+
+                    {/* OTP */}
+
+                    {
+                        showOtpInput &&
+                        <div className="otp-box">
+
+                            <input
+                                type="text"
+                                placeholder="Enter OTP"
+                                value={otp}
+                                onChange={(e) => setOtp(e.target.value)}
+                            />
+
+                            <button
+                                type="button"
+                                className="otp-btn"
+                                onClick={handleVerifyOtp}
+                            >
+                                Verify OTP
+                            </button>
+
+                        </div>
+                    }
+
+                    {/* Password */}
+
+                    <div className="input-group">
+
+                        <input
+            type="password"
+            value={password}
+            placeholder="Password"
+            onChange={(e)=>{
+                const value=e.target.value;
+
+                setPassword(value);
+
+                validatePassword(value,confirmPassword);
+            }}
+            className={passwordStatus.type}
+            />
+
+                    </div>
+
+                    {/* Confirm Password */}
+
+                    <div className="input-group">
+
+                       <input
+type="password"
+value={confirmPassword}
+placeholder="Confirm Password"
+onChange={(e)=>{
+
+    const value=e.target.value;
+
+    setConfirmPassword(value);
+
+    validatePassword(password,value);
+
+}}
+className={passwordStatus.type}
+/>
+
+                        {
+                            passwordStatus.type === "success" &&
+                            <span className="success-icon">
+                                ✓
+                            </span>
+                        }
+
+                    </div>
+
+                    {
+                        passwordStatus.type === "error" &&
+                        <p className="status error">
+                            {passwordStatus.message}
+                        </p>
+                    }
+
+                    <button
+                        className="signup-btn"
+                        type="submit"
+                        disabled={!allowSignup}
+                    >
+                        Create Account
+                    </button>
+
+                    <Link
+                        className="login-link"
+                        to="/Login"
+                    >
+                        Already have an account?
+                        <strong> Log In</strong>
+                    </Link>
+
+                </form>
+
+            </div>
+
+        </div>
+    );
+
 };
 
 export default Signup;
