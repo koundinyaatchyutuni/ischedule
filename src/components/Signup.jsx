@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import axios from "./api";
 import "./Signup.css";
 
 const Signup = () => {
@@ -83,7 +83,7 @@ const Signup = () => {
         try {
 
             const result = await axios.post(
-                "http://localhost:3001/finduser",
+                "/finduser",
                 { username }
             );
 
@@ -264,7 +264,7 @@ const Signup = () => {
         try {
 
             const result = await axios.post(
-                "http://localhost:3001/sendotp",
+                "/sendotp",
                 {
                     email: usermail
                 }
@@ -411,7 +411,7 @@ const Signup = () => {
         try {
 
             const result = await axios.post(
-                "http://localhost:3001/signup",
+                "/signup",
                 {
                     username,
                     password,

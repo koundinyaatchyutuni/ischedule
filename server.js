@@ -25,10 +25,13 @@ function generateOTP() {
 
 const app = express();
 // const jws = require('jsonwebtoken');
-app.use(cors());
+app.use(cors({
+    origin: process.env.CLIENT_URL,
+    credentials: true
+}));
 app.use(express.json());
 
-mongoose.connect(process.env.mongo_uri)
+await mongoose.connect(process.env.mongo_uri)
     .then(() => console.log("MongoDB Connected"))
     .catch(err => console.log(err));
 
@@ -260,7 +263,7 @@ app.post("/login", async(req, res) => {
                 id: user._id,
                 username: user.user_name
             },
-            "secretkey", {
+            process.env.JWT_SECRET, {
                 expiresIn: "1h"
             }
         );
@@ -282,7 +285,8 @@ app.post("/login", async(req, res) => {
     }
 });
 
+const PORT = process.env.PORT || 5000;
 
-app.listen(process.env.port, () => {
-    console.log("Server running on http://localhost:" + process.env.port);
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
 });

@@ -5,7 +5,7 @@ import profilePic from '../assets/image.png';
 import luffy from '../assets/luffy profile image.png';
 import calender_img from '../assets/calender.png';
 import logout from '../assets/logout1.png';
-import axios from "axios";
+import axios from "./api";
 import Repeat from "./Repeat";
 import Clock from "./Clock";
 import dayjs from "dayjs";
@@ -149,7 +149,7 @@ useEffect(() => {
 
             try {
                 const response = await axios.post(
-                    "http://localhost:3001/gettasks",
+                    "/gettasks",
                     {
                         username: storedUser.username,
                     }
@@ -332,7 +332,7 @@ const deleteTask = (id) => {
     e.preventDefault();
     // setTasks([...tasks]);
     const username = user.username;
-    const responce = await axios.post('http://localhost:3001/savetasks',{ username, tasks, schedule });
+    const responce = await axios.post('/savetasks',{ username, tasks, schedule });
     if (responce.status === 200) {
       alert("Tasks saved successfully");
     } else {
