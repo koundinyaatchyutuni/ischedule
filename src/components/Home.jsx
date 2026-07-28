@@ -5,7 +5,7 @@ import profilePic from '../assets/image.png';
 import luffy from '../assets/luffy profile image.png';
 import calender_img from '../assets/calender.png';
 import logout from '../assets/logout1.png';
-import axios from "./api";
+import axios from "../api";
 import Repeat from "./Repeat";
 import Clock from "./Clock";
 import dayjs from "dayjs";
