@@ -320,14 +320,16 @@ Send Email Before Task Starts
 # 📸 Screenshots
 
 > Add screenshots of
-
-- Login Page
-- Signup Page
-- Dashboard
+-Login page
+<img width="1919" height="843" alt="image" src="https://github.com/user-attachments/assets/92a2c610-71c4-45f0-a02e-480db7e646c8" />
+-signup page
+<img width="1839" height="845" alt="image" src="https://github.com/user-attachments/assets/8d2a6501-e25d-4b1a-a544-8bef18c3c9ec" />
+- Home page
+  <img width="1886" height="721" alt="image" src="https://github.com/user-attachments/assets/8cae05b6-4904-4919-a3ed-375cb53ff4d2" />
 - Schedule View
+  <img width="1739" height="771" alt="image" src="https://github.com/user-attachments/assets/6beee5ea-919e-41d8-ac41-5764e4385b4e" />
 - Reminder Email
-- Profile Page
-
+<img width="1483" height="896" alt="image" src="https://github.com/user-attachments/assets/adf5236a-5545-42e1-b18c-f6458f507f9f" />
 ---
 
 # 🚀 Deployment
